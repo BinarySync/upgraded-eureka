@@ -28,6 +28,10 @@ git pull: downloads newest version of the project to your folder(if is not updat
 git reset 
 	--hard <commit_id>: resets the branch to a speficific version of the branch, allowing row backs.
 	
+git stash save 
+	--keep-index: save current build on pc for later use.
+	
+git stash drop: delete saved build.
 -------------------------------------------
 
 Useful COMBOS:
