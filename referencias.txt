@@ -1,5 +1,3 @@
-https://biometrictoday.com/25-advantages-disadvantages-iris-recognition/
-
 https://www.pyimagesearch.com/2018/06/25/raspberry-pi-face-recognition/
 
 https://www.makeuseof.com/tag/different-uses-raspberry-pi/
