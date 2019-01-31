@@ -11,3 +11,5 @@ https://docs.opencv.org/2.4/opencv_tutorials.pdf
 https://www.cse.unr.edu/~bebis/CS485/Lectures/Intro_OpenCV.pdf
 
 https://www.techworld.com/security/facial-recognition-technology-what-are-dangers-security-preventions-3669268/
+
+https://www.facefirst.com/blog/brief-history-of-face-recognition-software/ - citando
