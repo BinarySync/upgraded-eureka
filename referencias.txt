@@ -17,3 +17,13 @@ https://www.facefirst.com/blog/brief-history-of-face-recognition-software/
 https://blog.fazedores.com/raspberry-pi-b-introducao-porta-gpio/
 
 https://books.google.com.br/books?hl=pt-PT&lr=&id=xYhMlilTwC4C&oi=fnd&pg=PR2&dq=raspberry&ots=W48gkyn9q2&sig=N4b3LiN9TM1Tt4e6wcHw7b3QAyI#v=onepage&q=raspberry&f=false
+
+-------------------- ALGUNS LINKS PARA CHECAR
+
+https://link.springer.com/chapter/10.1007/978-3-642-13681-8_24
+
+https://docs.opencv.org/2.4/modules/contrib/doc/facerec/facerec_tutorial.html#local-binary-patterns-histograms
+
+https://www.quora.com/Which-is-the-best-face-recognition-algorithm-in-OpenCV-Python
+
+https://m.univates.br/bdu/handle/10737/2328
