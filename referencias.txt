@@ -17,3 +17,5 @@ https://www.facefirst.com/blog/brief-history-of-face-recognition-software/
 https://blog.fazedores.com/raspberry-pi-b-introducao-porta-gpio/
 
 https://books.google.com.br/books?hl=pt-PT&lr=&id=xYhMlilTwC4C&oi=fnd&pg=PR2&dq=raspberry&ots=W48gkyn9q2&sig=N4b3LiN9TM1Tt4e6wcHw7b3QAyI#v=onepage&q=raspberry&f=false
+
+https://osintbrasil.blogspot.com/2017/04/reconhecimento-facial-com-python.html
