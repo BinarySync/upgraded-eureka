@@ -22,10 +22,21 @@ video_capture.release()
 
 #######[IMG IMPORT]########
 #img = cv2.imread("D:/image.jpg")
-img = cv2.imread("C:/Users/Acer/Pictures/Capturar.png")
+#img = cv2.imread("C:/Users/Acer/Pictures/Capturar.png")
 #Usando dois argumentos, o segundo trata de 
 #uma chave para decidir usar preto e branco
-#img = cv2.imread("D:/img.png",0)
+#Aparentemente, tanto imread quanto o np.array servem para importar a imagem
+img = cv2.imread("C:/Users/Acer/Pictures/Capturar.png",0)
+
+import numpy as np
+from PIL import Image
+#Usar o Convert 'L' transforma a imagem em grayscale
+faceImg = Image.open("C:/Users/Acer/Pictures/Capturar.png").convert('L')
+faceNp = np.array(faceImg,'uint8')
+
+cv2.imshow("Test",img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 ############################
 
 ######[IMG RESIZING]########
@@ -95,18 +106,72 @@ print("Directory name is : " + foldername)
 ########################
 ########################
 
+#TESTING
+import cv2
+import numpy as np
 #Project Dir
-import os
-proj_dir = os.getcwd()
-proj_dir = proj_dir + "\\"
-#proj_dir = "C:/NeoTokyo/Documents/GitHub/upgraded-eureka/codes/"
+#import os
+#proj_dir = os.getcwd()
+#proj_dir = proj_dir + "\\"
+proj_dir = "C:/NeoTokyo/Documents/GitHub/upgraded-eureka/codes/"
 
 #VIDEO SOURCE, SET 0 to Camera
 #source = 0
 source = proj_dir+'video1.mp4'
 
-#TESTING
-import cv2
+#ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
+#TEMOS DE ARRANJAR UM JEITO DE CARREGAR MAIS VÍDEOS E DIZER QUAL É O ID DE CADA VIDEO
+#O RECONHECIMENTO FUNCIONA DIZENDO NO TRAINING QUEM É O QUE, PELAS LABEL E FRAMES
+#Aparentemente, treinar só uma pessoa faz o código não funcionar, ele não detecta outras pessoas.
+def getImagesFromVideo(source):
+    faces = []
+    ids = []
+    video_capture = cv2.VideoCapture(source)
+    if not video_capture.isOpened():
+        raise Exception("Erro ao acessar fonte de vídeo")
+    ret, frame = video_capture.read()
+    length = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+    while(ret and len(faces) != length-1):
+        #As imagens tem de estar em preto em branco para o LBPH aceitar.
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces.append(frame)
+        #os ID das pessoas só podem ser numéricos1
+        ids.append(1)
+        ret, frame = video_capture.read()
+        cv2.imshow("training",frame)
+        cv2.waitKey(10)
+        
+    cv2.destroyAllWindows() 
+    return faces,np.array(ids)
+
+#Código copiado, ajeitar ainda.
+def getImagesWithID(path):
+    imagePaths = [os.path.join(path,f) for f in os.listdir(path)]
+    faces = []
+    IDs = []
+    for imagePath in imagePaths:
+        faceImg = Image.open(imagePath).convert('L')
+        faceNp = np.array(faceImg,'uint8')
+        ID = int(os.path.split(imagePath)[-1].split('.')[1])
+        faces.append(faceNp)
+        IDs.append(ID)
+        cv2.imshow("training",faceNp)
+        cv2.waitKey(10)
+    cv2.destroyAllWindows() 
+    return np.array(IDs), faces
+
+#rec = cv2.face.EigenFaceRecognizer_create()
+#rec = cv2.face.FisherFaceRecognizer_create()
+rec = cv2.face.LBPHFaceRecognizer_create()
+
+faces,ids = getImagesFromVideo(proj_dir+'video0.mp4')
+#Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
+rec.train(faces,ids)
+rec.save(proj_dir+'trainingData.yml')
+
+
+
+
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
 if not video_capture.isOpened():
@@ -121,13 +186,19 @@ fontScale              = 1
 fontColor              = (255,255,255)
 lineType               = 2
 
-face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
-
-##LOOP
+##PRE LOOP SET UP AND CASCADE CLASSIFIER SETTING
 video_capture = cv2.VideoCapture(source)
 if not video_capture.isOpened():
     raise Exception("Erro ao acessar fonte de vídeo")
+face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
 
+##ADDING THE RECOGNIZER AND LOADING TRAINING DATA
+#rec = cv2.face.EigenFaceRecognizer_create()
+#rec = cv2.face.FisherFaceRecognizer_create()
+rec = cv2.face.LBPHFaceRecognizer_create()
+rec.read(proj_dir+"trainingData.yml")
+
+##FACE DETECTION LOOP
 loops = 0;
 length = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT));
 
@@ -147,18 +218,23 @@ while (ret == True and (loops<500 and loops != length-1)):
         lineType)
 
     #Face recognition
-    ##Turning Gray (it wasnt used before and worked anyway)
-    ##frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    ##Turning Gray (it wasnt used before and worked for detecting faces)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
     ##Recognizing
     faces = face_cascade.detectMultiScale(
         frame,
-        scaleFactor=1.2,
+        scaleFactor=1.3,
         minNeighbors=5
         )
     #faces = faces*1/size
     for (x, y, w, h) in faces:
+        ids,conf = rec.predict(frame[y:y+h,x:x+w])
         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        if conf < 50:
+            cv2.putText(frame, ids, (x+2,y+h-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (150,255,0),2)
+        else:
+            cv2.putText(frame, 'No Match: '+str(conf), (x+2,y+h-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255),2)
     
     cv2.imshow("Camera Frame",frame)
     #Uma segunda tela aumenta mais ou menos 2% a mais do processamento
