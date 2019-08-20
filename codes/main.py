@@ -113,17 +113,13 @@ import numpy as np
 #import os
 #proj_dir = os.getcwd()
 #proj_dir = proj_dir + "\\"
-proj_dir = "C:/NeoTokyo/Documents/GitHub/upgraded-eureka/codes/"
-
-#VIDEO SOURCE, SET 0 to Camera
-#source = 0
-source = proj_dir+'video1.mp4'
+proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 
 #ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
 #TEMOS DE ARRANJAR UM JEITO DE CARREGAR MAIS VÍDEOS E DIZER QUAL É O ID DE CADA VIDEO
 #O RECONHECIMENTO FUNCIONA DIZENDO NO TRAINING QUEM É O QUE, PELAS LABEL E FRAMES
 #Aparentemente, treinar só uma pessoa faz o código não funcionar, ele não detecta outras pessoas.
-def getImagesFromVideo(source):
+def getImagesFromVideo(source,id):
     faces = []
     ids = []
     video_capture = cv2.VideoCapture(source)
@@ -136,7 +132,7 @@ def getImagesFromVideo(source):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces.append(frame)
         #os ID das pessoas só podem ser numéricos1
-        ids.append(1)
+        ids.append(id)
         ret, frame = video_capture.read()
         cv2.imshow("training",frame)
         cv2.waitKey(10)
@@ -144,7 +140,9 @@ def getImagesFromVideo(source):
     cv2.destroyAllWindows() 
     return faces,np.array(ids)
 
-#Código copiado, ajeitar ainda.
+#Código copiado, ajeitar ainda.    
+from PIL import Image
+
 def getImagesWithID(path):
     imagePaths = [os.path.join(path,f) for f in os.listdir(path)]
     faces = []
@@ -158,19 +156,68 @@ def getImagesWithID(path):
         cv2.imshow("training",faceNp)
         cv2.waitKey(10)
     cv2.destroyAllWindows() 
-    return np.array(IDs), faces
+    return faces, np.array(IDs)
+
+#Teste de código para importar imagem a imagem.
+def getImageFromPath(imagedir,ID):
+    faces = []
+    IDs = []
+    faceImg = Image.open(imagedir).convert('L')
+    faceNp = np.array(faceImg,'uint8')
+    faces.append(faceNp)
+    
+    IDs.append(ID)
+    cv2.imshow("training",faceNp)
+    cv2.waitKey(10)
+    
+    cv2.destroyAllWindows() 
+    return faces, np.array(IDs)
 
 #rec = cv2.face.EigenFaceRecognizer_create()
 #rec = cv2.face.FisherFaceRecognizer_create()
 rec = cv2.face.LBPHFaceRecognizer_create()
 
-faces,ids = getImagesFromVideo(proj_dir+'video0.mp4')
+#Adding to the training array with VIDEO
+#training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'video1.mp4',1)
+#training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',2)
+
+#Adding to the training array with IMAGE
+training_faces      ,training_ids       = getImageFromPath(proj_dir+'fer_1.jpg',1)
+
+training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'fer_2.jpg',1)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'fer_3.jpg',1)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_1.jpg',2)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_2.jpg',2)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_3.jpg',2)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+##extend junta os arrays
+#training_faces.extend(training_faces_add)
+##os elementos dentro do concatenate tem de ser uma lista de arrays, por isso o "( )" entre os elementos
+#training_ids = np.concatenate((training_ids,training_ids_add))
+##ids.extend(ids_add)
+
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
-rec.train(faces,ids)
+rec.train(training_faces,training_ids)
 rec.save(proj_dir+'trainingData.yml')
 
 
-
+#VIDEO SOURCE, SET 0 to Camera
+#source = 0
+source = proj_dir+'video1.mp4'
 
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
@@ -229,8 +276,8 @@ while (ret == True and (loops<500 and loops != length-1)):
         )
     #faces = faces*1/size
     for (x, y, w, h) in faces:
-        ids,conf = rec.predict(frame[y:y+h,x:x+w])
         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        ids,conf = rec.predict(frame[y:y+h,x:x+w])
         if conf < 50:
             cv2.putText(frame, ids, (x+2,y+h-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (150,255,0),2)
         else:
