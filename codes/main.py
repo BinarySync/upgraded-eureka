@@ -137,10 +137,18 @@ def getImagesFromVideo(source,id):
     while(ret and len(faces) != length-1):
         #As imagens tem de estar em preto em branco para o LBPH aceitar.
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces.append(frame)
-        #os ID das pessoas só podem ser numéricos1
-        ids.append(id)
-        cv2.imshow("training",frame)
+        
+        face = face_cascade.detectMultiScale(
+        frame,
+        scaleFactor=1.3,
+        minNeighbors=5
+        )
+        
+        for (x, y, w, h) in face:
+            faces.append(frame[y:y+h,x:x+w])
+            #os ID das pessoas só podem ser numéricos1
+            ids.append(id)
+        cv2.imshow("training",frame[y:y+h,x:x+w])
         cv2.waitKey(10)
         ret, frame = video_capture.read()
         
@@ -211,8 +219,6 @@ training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'eri.mp4',
 training_faces.extend(training_faces_add)
 training_ids = np.concatenate((training_ids,training_ids_add))
 
-#Adding to the training array with IMAGE
-training_faces      ,training_ids       = getImageFromPath(proj_dir+'nan_1.jpg',1)
 
 ##extend junta os arrays
 ##training_faces.extend(training_faces_add)
@@ -220,20 +226,9 @@ training_faces      ,training_ids       = getImageFromPath(proj_dir+'nan_1.jpg',
 ##training_ids = np.concatenate((training_ids,training_ids_add))
 ##ids.extend(ids_add)
 
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_1.jpg',3)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_2.jpg',3)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_3.jpg',3)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
 ##extend junta os arrays
 #Adding to the training array with IMAGE
+
 #training_faces      ,training_ids       = getImageFromPath(proj_dir+'nan_1.jpg',1)
 
 #training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'nan_2.jpg',1)
@@ -256,6 +251,19 @@ training_faces      ,training_ids       = getImageFromPath(proj_dir+'nan_1.jpg',
 #training_faces.extend(training_faces_add)
 #training_ids = np.concatenate((training_ids,training_ids_add))
 
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_1.jpg',3)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
+
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_2.jpg',3)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
+
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_3.jpg',3)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
+
+
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
 rec.train(training_faces,training_ids)
 rec.save(proj_dir+'trainingData.yml')
@@ -264,7 +272,7 @@ rec.save(proj_dir+'trainingData.yml')
 
 #VIDEO SOURCE, SET 0 to Camera
 source = 0
-#source = proj_dir+'video3.mp4'
+#source = proj_dir+'car.mp4'
 
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
@@ -324,11 +332,11 @@ while (ret and (loops<500 and loops != length-1)):
     #faces = faces*1/size
     for (x, y, w, h) in faces:
         ids,conf = rec.predict(frame[y:y+h,x:x+w])
-        conf=100-float(conf);
+        #conf=100-float(conf);
         if conf < 50:
             cv2.putText(frame, str(ids)+" "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
         else:
-            cv2.putText(frame, "No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
+            cv2.putText(frame, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
     cv2.imshow("Camera Frame",frame)
     #Uma segunda tela aumenta mais ou menos 2% a mais do processamento
