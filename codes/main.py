@@ -37,6 +37,10 @@ faceNp = np.array(faceImg,'uint8')
 cv2.imshow("Test",img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+cv2.imshow("Test",frame)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 ############################
 
 ######[IMG RESIZING]########
@@ -116,6 +120,7 @@ import numpy as np
 #proj_dir = proj_dir + "\\"
 proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 #proj_dir = "D:/Git/upgraded-eureka/codes/"
+#proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
 
 #ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
 #TEMOS DE ARRANJAR UM JEITO DE CARREGAR MAIS VÍDEOS E DIZER QUAL É O ID DE CADA VIDEO
@@ -135,9 +140,9 @@ def getImagesFromVideo(source,id):
         faces.append(frame)
         #os ID das pessoas só podem ser numéricos1
         ids.append(id)
-        ret, frame = video_capture.read()
         cv2.imshow("training",frame)
         cv2.waitKey(10)
+        ret, frame = video_capture.read()
         
     cv2.destroyAllWindows() 
     return faces,np.array(ids)
@@ -188,51 +193,74 @@ rec = cv2.face.LBPHFaceRecognizer_create()
 #training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'video1.mp4',1)
 #training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',3)
 
+training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'nan.mp4',1)
+
+training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'bin.mp4',2)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'mar.mp4',3)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'car.mp4',4)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'eri.mp4',5)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
 
 #Adding to the training array with IMAGE
 training_faces      ,training_ids       = getImageFromPath(proj_dir+'nan_1.jpg',1)
 
-training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'nan_2.jpg',1)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
+##extend junta os arrays
+##training_faces.extend(training_faces_add)
+##os elementos dentro do concatenate tem de ser uma lista de arrays, por isso o "( )" entre os elementos
+##training_ids = np.concatenate((training_ids,training_ids_add))
+##ids.extend(ids_add)
 
-training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'nan_3.jpg',1)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_1.jpg',3)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
 
-training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_1.jpg',2)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_2.jpg',3)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
 
-training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_2.jpg',2)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
-
-training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_3.jpg',2)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
-
-training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_1.jpg',3)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
-
-training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_2.jpg',3)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
-
-training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_3.jpg',3)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_3.jpg',3)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
 
 ##extend junta os arrays
+#Adding to the training array with IMAGE
+#training_faces      ,training_ids       = getImageFromPath(proj_dir+'nan_1.jpg',1)
+
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'nan_2.jpg',1)
 #training_faces.extend(training_faces_add)
-##os elementos dentro do concatenate tem de ser uma lista de arrays, por isso o "( )" entre os elementos
 #training_ids = np.concatenate((training_ids,training_ids_add))
-##ids.extend(ids_add)
+
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'nan_3.jpg',1)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
+
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_1.jpg',2)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
+
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_2.jpg',2)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
+
+#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_3.jpg',2)
+#training_faces.extend(training_faces_add)
+#training_ids = np.concatenate((training_ids,training_ids_add))
 
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
 rec.train(training_faces,training_ids)
 rec.save(proj_dir+'trainingData.yml')
+
+
 
 #VIDEO SOURCE, SET 0 to Camera
 source = 0
@@ -268,7 +296,7 @@ rec.read(proj_dir+"trainingData.yml")
 loops = 0;
 length = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT));
 
-while (ret == True and (loops<500 and loops != length-1)):
+while (ret and (loops<500 and loops != length-1)):
     ret, frame = video_capture.read()
     #IMG PROCESSING
     ##IMG RESIZING - Lower Res = Higher Speed
