@@ -114,8 +114,8 @@ import numpy as np
 #import os
 #proj_dir = os.getcwd()
 #proj_dir = proj_dir + "\\"
-#proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
-proj_dir = "D:/Git/upgraded-eureka/codes/"
+proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
+#proj_dir = "D:/Git/upgraded-eureka/codes/"
 
 #ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
 #TEMOS DE ARRANJAR UM JEITO DE CARREGAR MAIS VÍDEOS E DIZER QUAL É O ID DE CADA VIDEO
@@ -186,7 +186,7 @@ rec = cv2.face.LBPHFaceRecognizer_create()
 
 #Adding to the training array with VIDEO
 #training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'video1.mp4',1)
-#training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',2)
+#training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',3)
 
 
 #Adding to the training array with IMAGE
@@ -212,6 +212,18 @@ training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_3.jpg',
 training_faces.extend(training_faces_add)
 training_ids = np.concatenate((training_ids,training_ids_add))
 
+training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_1.jpg',3)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_2.jpg',3)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
+training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_3.jpg',3)
+training_faces.extend(training_faces_add)
+training_ids = np.concatenate((training_ids,training_ids_add))
+
 ##extend junta os arrays
 #training_faces.extend(training_faces_add)
 ##os elementos dentro do concatenate tem de ser uma lista de arrays, por isso o "( )" entre os elementos
@@ -223,8 +235,8 @@ rec.train(training_faces,training_ids)
 rec.save(proj_dir+'trainingData.yml')
 
 #VIDEO SOURCE, SET 0 to Camera
-#source = 0
-source = proj_dir+'video1.mp4'
+source = 0
+#source = proj_dir+'video3.mp4'
 
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
@@ -284,11 +296,12 @@ while (ret == True and (loops<500 and loops != length-1)):
     #faces = faces*1/size
     for (x, y, w, h) in faces:
         ids,conf = rec.predict(frame[y:y+h,x:x+w])
+        conf=100-float(conf);
         if conf < 50:
-            cv2.putText(frame, ids, (x+2,y+h-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (150,255,0),2)
+            cv2.putText(frame, str(ids)+" "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
         else:
-            cv2.putText(frame, 'No Match: '+str(conf), (x+2,y+h-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255),2)
-        #cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            cv2.putText(frame, "No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
     cv2.imshow("Camera Frame",frame)
     #Uma segunda tela aumenta mais ou menos 2% a mais do processamento
     #Mas pode servir para mostrarmos a imagem original e a usada para processar
