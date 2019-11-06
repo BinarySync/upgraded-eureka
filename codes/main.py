@@ -118,9 +118,10 @@ import numpy as np
 #import os
 #proj_dir = os.getcwd()
 #proj_dir = proj_dir + "\\"
-proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
+#proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 #proj_dir = "D:/Git/upgraded-eureka/codes/"
-#proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
+proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
+face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
 
 #ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
 #TEMOS DE ARRANJAR UM JEITO DE CARREGAR MAIS VÍDEOS E DIZER QUAL É O ID DE CADA VIDEO
@@ -292,7 +293,7 @@ lineType               = 2
 video_capture = cv2.VideoCapture(source)
 if not video_capture.isOpened():
     raise Exception("Erro ao acessar fonte de vídeo")
-face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
+
 
 ##ADDING THE RECOGNIZER AND LOADING TRAINING DATA
 #rec = cv2.face.EigenFaceRecognizer_create()
