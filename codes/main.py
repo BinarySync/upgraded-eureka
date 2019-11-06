@@ -202,21 +202,21 @@ rec = cv2.face.LBPHFaceRecognizer_create()
 #training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'video1.mp4',1)
 #training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',3)
 
-training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'nan.mp4',1)
+training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'/midia/'+'nan.mp4',1)
 
-training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'bin.mp4',2)
+training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'bin.mp4',2)
 training_faces.extend(training_faces_add)
 training_ids = np.concatenate((training_ids,training_ids_add))
 
-training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'mar.mp4',3)
+training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'mar.mp4',3)
 training_faces.extend(training_faces_add)
 training_ids = np.concatenate((training_ids,training_ids_add))
 
-training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'car.mp4',4)
+training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'car.mp4',4)
 training_faces.extend(training_faces_add)
 training_ids = np.concatenate((training_ids,training_ids_add))
 
-training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'eri.mp4',5)
+training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'eri.mp4',5)
 training_faces.extend(training_faces_add)
 training_ids = np.concatenate((training_ids,training_ids_add))
 
