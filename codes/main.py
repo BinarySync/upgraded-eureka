@@ -131,6 +131,7 @@ face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.x
 def getImagesFromVideo(source,id):
     faces = []
     ids = []
+    x_old,y_old,w_old,h_old = [0,0,0,0]
     video_capture = cv2.VideoCapture(source)
     if not video_capture.isOpened():
         raise Exception("Erro ao acessar fonte de vídeo")
@@ -147,11 +148,13 @@ def getImagesFromVideo(source,id):
         )
         
         for (x, y, w, h) in face:
-            faces.append(frame[y:y+h,x:x+w])
-            #os ID das pessoas só podem ser numéricos1
-            ids.append(id)
-        cv2.imshow("training",frame[y:y+h,x:x+w])
-        cv2.waitKey(10)
+            if x != x_old and y != y_old and w != w_old and h != h_old:
+                x_old,y_old,w_old,h_old = [x,y,w,h]
+                faces.append(frame[y:y+h,x:x+w])
+                #os ID das pessoas só podem ser numéricos1
+                ids.append(id)
+                cv2.imshow("training",frame[y:y+h,x:x+w])
+                cv2.waitKey(10)
         ret, frame = video_capture.read()
         
     cv2.destroyAllWindows() 
@@ -274,7 +277,7 @@ rec.save(proj_dir+'trainingData.yml')
 
 #VIDEO SOURCE, SET 0 to Camera
 #source = 0
-source = proj_dir+'/midia/'+'car.mp4'
+source = proj_dir+'/midia/'+'eri.mp4'
 
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
