@@ -120,7 +120,8 @@ import numpy as np
 #proj_dir = proj_dir + "\\"
 #proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 #proj_dir = "D:/Git/upgraded-eureka/codes/"
-proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
+#proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
+proj_dir = "C:/Users/ALUNO/Documents/NanDS/upgraded-eureka/codes/"
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
 
 #ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
@@ -272,8 +273,8 @@ rec.save(proj_dir+'trainingData.yml')
 
 
 #VIDEO SOURCE, SET 0 to Camera
-source = 0
-#source = proj_dir+'car.mp4'
+#source = 0
+source = proj_dir+'/midia/'+'car.mp4'
 
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
