@@ -118,10 +118,10 @@ import numpy as np
 #import os
 #proj_dir = os.getcwd()
 #proj_dir = proj_dir + "\\"
-#proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
+proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 #proj_dir = "D:/Git/upgraded-eureka/codes/"
 #proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
-proj_dir = "C:/Users/ALUNO/Documents/NanDS/upgraded-eureka/codes/"
+#proj_dir = "C:/Users/ALUNO/Documents/NanDS/upgraded-eureka/codes/"
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
 
 #ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
@@ -188,41 +188,55 @@ def getImageFromPath(imagedir,ID):
     IDs = []
     faceImg = Image.open(imagedir).convert('L')
     faceNp = np.array(faceImg,'uint8')
-    faces.append(faceNp)
     
-    IDs.append(ID)
-    cv2.imshow("training",faceNp)
-    cv2.waitKey(10)
-    
-    cv2.destroyAllWindows() 
+    face = face_cascade.detectMultiScale(
+        faceNp,
+        scaleFactor=1.3,
+        minNeighbors=5
+        )
+        
+    for (x, y, w, h) in face:
+        faceNp = cv2.resize(faceNp[y:y+h,x:x+w], (640,640) )
+        faces.append(faceNp)
+        #os ID das pessoas só podem ser numéricos1
+        IDs.append(ID)
+        cv2.imshow("training",faceNp)
+        cv2.waitKey(1000)
+        cv2.destroyAllWindows() 
+
+    #faces.append(faceNp)
+    #IDs.append(ID)
+    #cv2.imshow("training",faceNp)
+    #cv2.waitKey(1000)
     return faces, np.array(IDs)
 
 #rec = cv2.face.EigenFaceRecognizer_create()
 #rec = cv2.face.FisherFaceRecognizer_create()
 rec = cv2.face.LBPHFaceRecognizer_create()
 
-
+mode = "photo"
+if mode=="video":
 #Adding to the training array with VIDEO
-#training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'video1.mp4',1)
-#training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',3)
-
-training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'/midia/'+'nan.mp4',1)
-
-training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'bin.mp4',2)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
-
-training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'mar.mp4',3)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
-
-training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'car.mp4',4)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
-
-training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'eri.mp4',5)
-training_faces.extend(training_faces_add)
-training_ids = np.concatenate((training_ids,training_ids_add))
+    training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'video1.mp4',1)
+    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',3)
+    
+    training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'/midia/'+'nan.mp4',1)
+    
+    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'bin.mp4',2)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
+    
+    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'mar.mp4',3)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
+    
+    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'car.mp4',4)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
+    
+    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'eri.mp4',5)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
 
 
 ##extend junta os arrays
@@ -233,51 +247,47 @@ training_ids = np.concatenate((training_ids,training_ids_add))
 
 ##extend junta os arrays
 #Adding to the training array with IMAGE
+if mode == "photo":
+    training_faces      ,training_ids       = getImageFromPath(proj_dir+'/midia/'+'nan_1.jpg',1)
+    
+    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'nan_2.jpg',1)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
+    
+    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'nan_3.jpg',1)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
 
-#training_faces      ,training_ids       = getImageFromPath(proj_dir+'nan_1.jpg',1)
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'nan_2.jpg',1)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'nan_3.jpg',1)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_1.jpg',2)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_2.jpg',2)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'bin_3.jpg',2)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_1.jpg',3)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_2.jpg',3)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
-
-#training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'lin_3.jpg',3)
-#training_faces.extend(training_faces_add)
-#training_ids = np.concatenate((training_ids,training_ids_add))
+    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'nan_4.jpg',1)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))    
+    
+    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'bin_1.jpg',2)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
+    
+    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'bin_2.jpg',2)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
+    
+    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'bin_3.jpg',2)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
+    
+    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'bin_4.jpg',2)
+    training_faces.extend(training_faces_add)
+    training_ids = np.concatenate((training_ids,training_ids_add))
 
 
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
-rec.train(training_faces,training_ids)
+rec.train(training_faces,training_ids.astype(int))
 rec.save(proj_dir+'trainingData.yml')
 
 
 
 #VIDEO SOURCE, SET 0 to Camera
-#source = 0
-source = proj_dir+'/midia/'+'eri.mp4'
+source = 0
+#source = proj_dir+'/midia/'+'eri.mp4'
 
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
@@ -313,7 +323,7 @@ while (ret and (loops<500 and loops != length-1)):
     ret, frame = video_capture.read()
     #IMG PROCESSING
     ##IMG RESIZING - Lower Res = Higher Speed
-    size = 0.5;
+    size = 1;
     frame = cv2.resize(frame,   (int(frame.shape[1]*size) , int(frame.shape[0]*size))   )
     
     ##INSERTING TEXT
@@ -336,7 +346,7 @@ while (ret and (loops<500 and loops != length-1)):
         )
     #faces = faces*1/size
     for (x, y, w, h) in faces:
-        ids,conf = rec.predict(frame[y:y+h,x:x+w])
+        ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], (640,640) ))
         #conf=100-float(conf);
         if conf < 50:
             cv2.putText(frame, str(ids)+" "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
