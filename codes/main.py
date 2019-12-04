@@ -183,26 +183,29 @@ def getImagesWithID(path):
 
 
 #Teste de código para importar imagem a imagem.
-def getImageFromPath(imagedir,ID):
+def getImageFromPath(imagedir, elements):
     faces = []
     IDs = []
-    faceImg = Image.open(imagedir).convert('L')
-    faceNp = np.array(faceImg,'uint8')
-    
-    face = face_cascade.detectMultiScale(
-        faceNp,
-        scaleFactor=1.3,
-        minNeighbors=5
-        )
+    for element in elements:    
+        print(element)
+        faceImg = Image.open(imagedir+element[0]).convert('L')
+        faceNp = np.array(faceImg,'uint8')
         
-    for (x, y, w, h) in face:
-        faceNp = cv2.resize(faceNp[y:y+h,x:x+w], (640,640) )
-        faces.append(faceNp)
-        #os ID das pessoas só podem ser numéricos1
-        IDs.append(ID)
-        cv2.imshow("training",faceNp)
-        cv2.waitKey(1000)
-        cv2.destroyAllWindows() 
+        face = face_cascade.detectMultiScale(
+            faceNp,
+            scaleFactor=1.3,
+            minNeighbors=5
+            )
+            
+        for (x, y, w, h) in face:
+            print(face)
+            faceNp = cv2.resize(faceNp[y:y+h,x:x+w], (640,640) )
+            faces.append(faceNp)
+            #os ID das pessoas só podem ser numéricos1
+            IDs.append(element[1])
+            cv2.imshow("training",faceNp)
+            cv2.waitKey(1000)
+            cv2.destroyAllWindows() 
 
     #faces.append(faceNp)
     #IDs.append(ID)
@@ -210,9 +213,9 @@ def getImageFromPath(imagedir,ID):
     #cv2.waitKey(1000)
     return faces, np.array(IDs)
 
-#rec = cv2.face.EigenFaceRecognizer_create()
+rec = cv2.face.EigenFaceRecognizer_create()
 #rec = cv2.face.FisherFaceRecognizer_create()
-rec = cv2.face.LBPHFaceRecognizer_create()
+#rec = cv2.face.LBPHFaceRecognizer_create()
 
 mode = "photo"
 if mode=="video":
@@ -248,35 +251,36 @@ if mode=="video":
 ##extend junta os arrays
 #Adding to the training array with IMAGE
 if mode == "photo":
-    training_faces      ,training_ids       = getImageFromPath(proj_dir+'/midia/'+'nan_1.jpg',1)
     
-    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'nan_2.jpg',1)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))
-    
-    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'nan_3.jpg',1)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))
+    training_faces      ,training_ids       = getImageFromPath(proj_dir+'/midia/',[['nan_1.jpg',1],
+                                                                                   ['nan_2.jpg',1],
+                                                                                   ['nan_3.jpg',1],
+                                                                                   ['nan_4.jpg',1],
+                                                                                   ['nan_5.jpg',1],
+                                                                                   ['nan_6.jpg',1],
+                                                                                   ['nan_7.jpg',1],
+                                                                                   ['nan_8.jpg',1],
+                                                                                   ['nan_9.jpg',1],
+                                                                                   ['bin_1.jpg',2],
+                                                                                   ['bin_2.jpg',2],
+                                                                                   ['bin_3.jpg',2],
+                                                                                   ['bin_4.jpg',2],
+                                                                                   ['bin_5.jpg',2],
+                                                                                   ['bin_6.jpg',2],
+                                                                                   ['bin_7.jpg',2],
+                                                                                   ['gab_1.jpg',3],
+                                                                                   ['gab_2.jpg',3],
+                                                                                   ['gab_3.jpg',3],
+                                                                                   ['gab_4.jpg',3],
+                                                                                   ['gab_5.jpg',3],
+                                                                                   ['gab_6.jpg',3],
+                                                                                   ['lin_1.jpg',4],
+                                                                                   ['lin_2.jpg',4],
+                                                                                   ['lin_3.jpg',4],
+                                                                                   ['lin_4.jpg',4],
+                                                                                   ['lin_5.jpg',4],
+                                                                                                  ])
 
-    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'nan_4.jpg',1)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))    
-    
-    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'bin_1.jpg',2)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))
-    
-    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'bin_2.jpg',2)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))
-    
-    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'bin_3.jpg',2)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))
-    
-    training_faces_add  ,training_ids_add   = getImageFromPath(proj_dir+'/midia/'+'bin_4.jpg',2)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))
 
 
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
@@ -287,7 +291,7 @@ rec.save(proj_dir+'trainingData.yml')
 
 #VIDEO SOURCE, SET 0 to Camera
 source = 0
-#source = proj_dir+'/midia/'+'eri.mp4'
+#source = proj_dir+'/midia/'+'video3.mp4'
 
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
@@ -310,9 +314,9 @@ if not video_capture.isOpened():
 
 
 ##ADDING THE RECOGNIZER AND LOADING TRAINING DATA
-#rec = cv2.face.EigenFaceRecognizer_create()
+rec = cv2.face.EigenFaceRecognizer_create()
 #rec = cv2.face.FisherFaceRecognizer_create()
-rec = cv2.face.LBPHFaceRecognizer_create()
+#rec = cv2.face.LBPHFaceRecognizer_create()
 rec.read(proj_dir+"trainingData.yml")
 
 ##FACE DETECTION LOOP
