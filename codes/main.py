@@ -204,7 +204,7 @@ def getImageFromPath(imagedir, elements):
             #os ID das pessoas só podem ser numéricos1
             IDs.append(element[1])
             cv2.imshow("training",faceNp)
-            cv2.waitKey(1000)
+            cv2.waitKey(250)
             cv2.destroyAllWindows() 
 
     #faces.append(faceNp)
@@ -213,9 +213,7 @@ def getImageFromPath(imagedir, elements):
     #cv2.waitKey(1000)
     return faces, np.array(IDs)
 
-rec = cv2.face.EigenFaceRecognizer_create()
-#rec = cv2.face.FisherFaceRecognizer_create()
-#rec = cv2.face.LBPHFaceRecognizer_create()
+
 
 mode = "photo"
 if mode=="video":
@@ -258,9 +256,9 @@ if mode == "photo":
                                                                                    ['nan_4.jpg',1],
                                                                                    ['nan_5.jpg',1],
                                                                                    ['nan_6.jpg',1],
-                                                                                   ['nan_7.jpg',1],
-                                                                                   ['nan_8.jpg',1],
-                                                                                   ['nan_9.jpg',1],
+                                                                                   #['nan_7.jpg',1],
+                                                                                   #['nan_8.jpg',1],
+                                                                                   #['nan_9.jpg',1],
                                                                                    ['bin_1.jpg',2],
                                                                                    ['bin_2.jpg',2],
                                                                                    ['bin_3.jpg',2],
@@ -268,12 +266,19 @@ if mode == "photo":
                                                                                    ['bin_5.jpg',2],
                                                                                    ['bin_6.jpg',2],
                                                                                    ['bin_7.jpg',2],
-                                                                                   ['gab_1.jpg',3],
-                                                                                   ['gab_2.jpg',3],
-                                                                                   ['gab_3.jpg',3],
-                                                                                   ['gab_4.jpg',3],
-                                                                                   ['gab_5.jpg',3],
-                                                                                   ['gab_6.jpg',3],
+                                                                                   ['eri_1.jpg',3],                                                                                 
+                                                                                   ['eri_2.jpg',3],
+                                                                                   ['eri_3.jpg',3],
+                                                                                   ['eri_4.jpg',3],
+                                                                                   ['eri_5.jpg',3],
+                                                                                   ['eri_6.jpg',3],
+                                                                                   ['eri_7.jpg',3],
+                                                                                   #['gab_1.jpg',3],
+                                                                                   #['gab_2.jpg',3],
+                                                                                   #['gab_3.jpg',3],
+                                                                                   #['gab_4.jpg',3],
+                                                                                   #['gab_5.jpg',3],
+                                                                                   #['gab_6.jpg',3],
                                                                                    ['lin_1.jpg',4],
                                                                                    ['lin_2.jpg',4],
                                                                                    ['lin_3.jpg',4],
@@ -284,6 +289,11 @@ if mode == "photo":
 
 
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
+
+#rec = cv2.face.EigenFaceRecognizer_create()
+#rec = cv2.face.FisherFaceRecognizer_create()
+rec = cv2.face.LBPHFaceRecognizer_create()
+
 rec.train(training_faces,training_ids.astype(int))
 rec.save(proj_dir+'trainingData.yml')
 
@@ -291,7 +301,7 @@ rec.save(proj_dir+'trainingData.yml')
 
 #VIDEO SOURCE, SET 0 to Camera
 source = 0
-#source = proj_dir+'/midia/'+'video3.mp4'
+# = proj_dir+'/midia/'+'video_bin.mp4'
 
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
@@ -314,9 +324,9 @@ if not video_capture.isOpened():
 
 
 ##ADDING THE RECOGNIZER AND LOADING TRAINING DATA
-rec = cv2.face.EigenFaceRecognizer_create()
+#rec = cv2.face.EigenFaceRecognizer_create()
 #rec = cv2.face.FisherFaceRecognizer_create()
-#rec = cv2.face.LBPHFaceRecognizer_create()
+rec = cv2.face.LBPHFaceRecognizer_create()
 rec.read(proj_dir+"trainingData.yml")
 
 ##FACE DETECTION LOOP
@@ -352,7 +362,7 @@ while (ret and (loops<500 and loops != length-1)):
     for (x, y, w, h) in faces:
         ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], (640,640) ))
         #conf=100-float(conf);
-        if conf < 50:
+        if conf < 30:
             cv2.putText(frame, str(ids)+" "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
         else:
             cv2.putText(frame, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
