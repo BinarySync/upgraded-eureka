@@ -118,10 +118,10 @@ import numpy as np
 #import os
 #proj_dir = os.getcwd()
 #proj_dir = proj_dir + "\\"
-proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
+#proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 #proj_dir = "D:/Git/upgraded-eureka/codes/"
 #proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
-#proj_dir = "C:/Users/ALUNO/Documents/NanDS/upgraded-eureka/codes/"
+proj_dir = "C:/Users/ALUNO/Documents/GitHub/upgraded-eureka/codes/"
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
 
 #ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
@@ -213,8 +213,6 @@ def getImageFromPath(imagedir, elements):
     #cv2.waitKey(1000)
     return faces, np.array(IDs)
 
-
-
 mode = "photo"
 if mode=="video":
 #Adding to the training array with VIDEO
@@ -300,8 +298,8 @@ rec.save(proj_dir+'trainingData.yml')
 
 
 #VIDEO SOURCE, SET 0 to Camera
-source = 0
-# = proj_dir+'/midia/'+'video_bin.mp4'
+#source = 0
+source = proj_dir+'/midia/'+'video_bin.mp4'
 
 ##QUICK BOOT
 video_capture = cv2.VideoCapture(source)
@@ -322,7 +320,6 @@ video_capture = cv2.VideoCapture(source)
 if not video_capture.isOpened():
     raise Exception("Erro ao acessar fonte de vídeo")
 
-
 ##ADDING THE RECOGNIZER AND LOADING TRAINING DATA
 #rec = cv2.face.EigenFaceRecognizer_create()
 #rec = cv2.face.FisherFaceRecognizer_create()
@@ -333,20 +330,17 @@ rec.read(proj_dir+"trainingData.yml")
 loops = 0;
 length = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT));
 
+import time
+frametime = []
+last_conf = -1
+
 while (ret and (loops<500 and loops != length-1)):
+    start = time.time()
     ret, frame = video_capture.read()
     #IMG PROCESSING
     ##IMG RESIZING - Lower Res = Higher Speed
     size = 1;
     frame = cv2.resize(frame,   (int(frame.shape[1]*size) , int(frame.shape[0]*size))   )
-    
-    ##INSERTING TEXT
-    cv2.putText(frame,'frame:'+str(loops)+' '+str(length), 
-        bottomLeftCornerOfText, 
-        font, 
-        fontScale,
-        fontColor,
-        lineType)
 
     #Face recognition
     ##Turning Gray (it wasnt used before and worked for detecting faces)
@@ -361,13 +355,31 @@ while (ret and (loops<500 and loops != length-1)):
     #faces = faces*1/size
     for (x, y, w, h) in faces:
         ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], (640,640) ))
+        
         #conf=100-float(conf);
         if conf < 30:
             cv2.putText(frame, str(ids)+" "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
         else:
             cv2.putText(frame, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-    cv2.imshow("Camera Frame",frame)
+
+    end = time.time()
+    seconds = end - start
+    fps  = seconds
+    if last_conf == conf:
+        conf = '--'
+    last_conf = conf
+    frametime.extend([[fps,conf]])
+
+    ##INSERTING TEXT
+    cv2.putText(frame,'FPS: '+str(fps)+'\nframe:'+str(loops)+' '+str(length), 
+        bottomLeftCornerOfText, 
+        font, 
+        fontScale,
+        fontColor,
+        lineType)
+    
+    cv2.imshow("Camera Frame ",frame)
     #Uma segunda tela aumenta mais ou menos 2% a mais do processamento
     #Mas pode servir para mostrarmos a imagem original e a usada para processar
     #cv2.imshow("Camera Frame2",frame)
