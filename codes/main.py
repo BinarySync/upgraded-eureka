@@ -170,9 +170,9 @@ if mode == "photo":
 
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
 
-rec = cv2.face.EigenFaceRecognizer_create()
+#rec = cv2.face.EigenFaceRecognizer_create()
 #rec = cv2.face.FisherFaceRecognizer_create()
-#rec = cv2.face.LBPHFaceRecognizer_create()
+rec = cv2.face.LBPHFaceRecognizer_create()
 
 rec.train(training_faces,training_ids.astype(int))
 rec.save(proj_dir+'trainingData.yml')
@@ -211,9 +211,9 @@ if not video_capture.isOpened():
     raise Exception("Erro ao acessar fonte de vídeo")
 
 ##ADDING THE RECOGNIZER AND LOADING TRAINING DATA
-rec = cv2.face.EigenFaceRecognizer_create()
+#rec = cv2.face.EigenFaceRecognizer_create()
 #rec = cv2.face.FisherFaceRecognizer_create()
-#rec = cv2.face.LBPHFaceRecognizer_create()
+rec = cv2.face.LBPHFaceRecognizer_create()
 rec.read(proj_dir+"trainingData.yml")
 
 ##FACE DETECTION LOOP
@@ -243,7 +243,8 @@ while (ret and (loops<500 and loops != length-1)):
         minNeighbors=5
         )
     ids = '--'
-    conf = '--'
+    conf = 10000000
+
     #faces = faces*1/size
     for (x, y, w, h) in faces:
         ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], (640,640) ))    
@@ -253,7 +254,7 @@ while (ret and (loops<500 and loops != length-1)):
         else:
             cv2.putText(frame, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
+        
     end = time.time()
     seconds = end - start
     fps  = "%6f" % seconds
@@ -286,13 +287,40 @@ video_capture.release()
 import pandas as pd 
 pd.DataFrame(frametime).to_csv(proj_dir+"/file.csv",header=None, index=None)
 
+
 #Importando de CSV
 import pandas as pd
-import plotly.express as px
+graph_mode = 'go'
 
-df = pd.read_csv(proj_dir+'/file.csv')
-fig = px.line(df, x=df.index, y='frametime' ,title='Frametimes')
-#fig.show()
+if graph_mode == 'px':
+    import plotly.express as px
+    
+    df = pd.read_csv(proj_dir+'/file.csv')
+    fig = px.line(df, x=df.index, y='frametime' ,title='Frametimes')
+    
+    df = pd.read_csv(proj_dir+'/file_1.csv')
+    fig.add_scatter(x=df.index,y=df['frametime'], mode='lines')
+
+if graph_mode == 'go':
+    import plotly.graph_objects as go
+    fig = go.Figure()
+    
+    df = pd.read_csv(proj_dir+'/file_no_rec.csv')
+    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name='2AM_NO_RECOGNITION'))
+    
+    df = pd.read_csv(proj_dir+'/file_haar.csv')
+    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name='2AM_ONLY_HAARCASCATE'))
+    
+    df = pd.read_csv(proj_dir+'/file_eighen.csv')
+    fig.add_trace(go.Scatter(x=df.index,y=df['frametime'], name='2AM_EIGHENFACE'))
+    
+    df = pd.read_csv(proj_dir+'/file.csv')
+    fig.add_trace(go.Scatter(x=df.index,y=df['frametime'], name='2AM_LBPH'))
+    #fig.show()
+    fig.update_layout(
+            title="Frametimes",
+            xaxis_title="Framenumber",
+            yaxis_title="Frametime")
 
 from plotly.offline import plot
 plot(fig)
