@@ -24,6 +24,14 @@ proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 #proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
 #proj_dir = "C:/Users/ALUNO/Documents/GitHub/upgraded-eureka/codes/"
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
+device = '2AM'
+
+#Existem três REC_MODE, 'LBPH', 'Fisher' e 'Eigen'. Existe um que não usa Reconhecimento, o 'null' e 'haar_only'
+#rec_mode = 'Eigen'    
+
+#Existem 2 tipos de treinamento(gerar os arrays para treinamento), o Photo e video
+train_mode = "photo"
+#train_mode = "null"
 
 #ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
 #TEMOS DE ARRANJAR UM JEITO DE CARREGAR MAIS VÍDEOS E DIZER QUAL É O ID DE CADA VIDEO
@@ -52,7 +60,7 @@ def getImagesFromVideo(source,id):
             if x != x_old and y != y_old and w != w_old and h != h_old:
                 x_old,y_old,w_old,h_old = [x,y,w,h]
                 faces.append(frame[y:y+h,x:x+w])
-                #os ID das pessoas só podem ser numéricos1
+                #os ID das pessoas só podem ser numéricos
                 ids.append(id)
                 cv2.imshow("training",frame[y:y+h,x:x+w])
                 cv2.waitKey(10)
@@ -95,8 +103,7 @@ def getImageFromPath(imagedir, elements):
     #cv2.waitKey(1000)
     return faces, np.array(IDs)
 
-mode = "photo"
-if mode=="video":
+if train_mode=="video":
 #Adding to the training array with VIDEO
     training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'video1.mp4',1)
     training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',3)
@@ -128,7 +135,7 @@ if mode=="video":
 
 ##extend junta os arrays
 #Adding to the training array with IMAGE
-if mode == "photo":
+if train_mode == "photo":
     
     training_faces      ,training_ids       = getImageFromPath(proj_dir+'/midia/',[['nan_1.jpg',1],
                                                                                    ['nan_2.jpg',1],
@@ -167,16 +174,25 @@ if mode == "photo":
                                                                                                   ])
 
 
-
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
 
-#rec = cv2.face.EigenFaceRecognizer_create()
-#rec = cv2.face.FisherFaceRecognizer_create()
-rec = cv2.face.LBPHFaceRecognizer_create()
+def run_trainer(rec_mode,training_faces,training_ids):
+    if rec_mode == 'Eigen':
+        rec = cv2.face.EigenFaceRecognizer_create()
+    
+    if rec_mode == 'Fisher':
+        rec = cv2.face.FisherFaceRecognizer_create()
+    
+    if rec_mode == 'LBPH':
+        rec = cv2.face.LBPHFaceRecognizer_create()
+    
+    if rec_mode != 'null' and rec_mode != 'haar_only':
+        rec.train(training_faces,training_ids.astype(int))
+        rec.save(proj_dir+rec_mode+'_trainingData.yml')
 
-rec.train(training_faces,training_ids.astype(int))
-rec.save(proj_dir+'trainingData.yml')
-
+run_trainer('LBPH',training_faces,training_ids)
+run_trainer('Eigen',training_faces,training_ids)
+run_trainer('Fisher',training_faces,training_ids)
 
 #######################################
 #######################################
@@ -191,101 +207,126 @@ rec.save(proj_dir+'trainingData.yml')
 #source = 0
 source = proj_dir+'/midia/'+'video_bin.mp4'
 
-##QUICK BOOT
-video_capture = cv2.VideoCapture(source)
-if not video_capture.isOpened():
-    raise Exception("Erro ao acessar fonte de vídeo")
-ret, frame = video_capture.read()
-video_capture.release()
-
-##TEXT DEFINITIONS
-font                   = cv2.FONT_HERSHEY_SIMPLEX
-bottomLeftCornerOfText = (10,30)
-fontScale              = 1
-fontColor              = (255,255,255)
-lineType               = 2
-
-##PRE LOOP SET UP AND CASCADE CLASSIFIER SETTING
-video_capture = cv2.VideoCapture(source)
-if not video_capture.isOpened():
-    raise Exception("Erro ao acessar fonte de vídeo")
-
-##ADDING THE RECOGNIZER AND LOADING TRAINING DATA
-#rec = cv2.face.EigenFaceRecognizer_create()
-#rec = cv2.face.FisherFaceRecognizer_create()
-rec = cv2.face.LBPHFaceRecognizer_create()
-rec.read(proj_dir+"trainingData.yml")
-
-##FACE DETECTION LOOP
-loops = 0;
-length = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT));
-
-import time
-frametime = ['frametime']
-last_conf = -1
-
-while (ret and (loops<500 and loops != length-1)):
-    start = time.time()
+def run_recognizer(rec_mode, source):
+    ##QUICK BOOT(AVOIDS PROBLEMS INTO LOADING)
+    video_capture = cv2.VideoCapture(source)
+    if not video_capture.isOpened():
+        raise Exception("Erro ao acessar fonte de vídeo")
     ret, frame = video_capture.read()
-    #IMG PROCESSING
-    ##IMG RESIZING - Lower Res = Higher Speed
-    size = 1;
-    frame = cv2.resize(frame,   (int(frame.shape[1]*size) , int(frame.shape[0]*size))   )
-
-    #Face recognition
-    ##Turning Gray (it wasnt used before and worked for detecting faces)
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    video_capture.release()
     
-    ##Recognizing
-    faces = face_cascade.detectMultiScale(
-        frame,
-        scaleFactor=1.3,
-        minNeighbors=5
-        )
-    ids = '--'
-    conf = 10000000
+    ##TEXT DEFINITIONS
+    font                   = cv2.FONT_HERSHEY_SIMPLEX
+    bottomLeftCornerOfText = (10,30)
+    fontScale              = 1
+    fontColor              = (255,255,255)
+    lineType               = 2
+    
+    ##PRE LOOP SET UP
+    video_capture = cv2.VideoCapture(source)
+    if not video_capture.isOpened():
+        raise Exception("Erro ao acessar fonte de vídeo")
+    
+    ##ADDING THE RECOGNIZER AND LOADING TRAINING DATA
+    if rec_mode == 'Eigen':
+        rec = cv2.face.EigenFaceRecognizer_create()
+    
+    if rec_mode == 'Fisher':
+        rec = cv2.face.FisherFaceRecognizer_create()
+    
+    if rec_mode == 'LBPH':
+        rec = cv2.face.LBPHFaceRecognizer_create()   
+    
+    if rec_mode != 'null' and rec_mode != 'haar_only':
+        rec.read(proj_dir+rec_mode+"_trainingData.yml")
+    
+    ##VIDEO LOOP SET UP
+    loops = 0;
+    length = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT));
+    
+    ##FRAMETIME SET UP
+    import time
+    frametime = ['frametime']
+    
+    #last_conf = -1
 
-    #faces = faces*1/size
-    for (x, y, w, h) in faces:
-        ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], (640,640) ))    
-        #conf=100-float(conf);
-        if conf < 30:
-            cv2.putText(frame, str(ids)+" "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
-        else:
-            cv2.putText(frame, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+    ##VIDEO LOOP START
+    while (ret and (loops<500 and loops != length-1)):
+        #FrameTime
+        ##FrameTime.starting time
+        start = time.time()
         
-    end = time.time()
-    seconds = end - start
-    fps  = "%6f" % seconds
-    #if last_conf == conf:
-    #    conf = '--'
-    #last_conf = conf
-    #frametime.extend([[fps,conf]])
-    frametime.extend([fps])
-
-    ##INSERTING TEXT
-    cv2.putText(frame,'FPS: '+str(fps)+'\nframe:'+str(loops)+' '+str(length), 
-        bottomLeftCornerOfText, 
-        font, 
-        fontScale,
-        fontColor,
-        lineType)
+        #IMG PROCESSING
+        ret, frame = video_capture.read()
+        
+        ##IMG PROCESSING.RESIZING - Lower Res = Higher Speed.
+        size = 1;
+        frame = cv2.resize(frame,   (int(frame.shape[1]*size) , int(frame.shape[0]*size))   )
     
-    cv2.imshow("Camera Frame ",frame)
-    #Uma segunda tela aumenta mais ou menos 2% a mais do processamento
-    #Mas pode servir para mostrarmos a imagem original e a usada para processar
-    #cv2.imshow("Camera Frame2",frame)
-    cv2.waitKey(1)
-    loops = loops + 1
-# Close device
-cv2.destroyAllWindows()
-video_capture.release()
-#FIM TESTE
+        ##IMG PROCESSING.Turning Image Gray (it wasnt used before and worked for detecting faces, but is needed for Recognizer)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    
+        #Face recognition  
+        ##Face recognition.HaarCascate, Detecting faces
+        if rec_mode != 'null':
+            faces = face_cascade.detectMultiScale(
+                frame,
+                scaleFactor=1.3,
+                minNeighbors=5
+                )
+            ids = '--'
+            conf = 10000000
+        
+            #faces = faces*1/size
+            for (x, y, w, h) in faces:
+                ##Face recognition.Using the Recognizer
+                if rec_mode != 'null' and rec_mode != 'haar_only':
+                    ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], (640,640) ))    
+                if conf < 30:
+                    cv2.putText(frame, str(ids)+". "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
+                else:
+                    cv2.putText(frame, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            
+        end = time.time()
+        seconds = end - start
+        ##FrameTime.formating, 6 digit float.
+        fps  = "%6f" % seconds
+        #if last_conf == conf:
+        #    conf = '--'
+        #last_conf = conf
+        #frametime.extend([[fps,conf]])
+        ##FrameTime.Add to graph
+        frametime.extend([fps])
+    
+        ##IMG PROCESSING.INSERTING TEXT on TOPLEFT
+        cv2.putText(frame,'FPS: '+str(fps)+' Frame:'+str(loops)+' '+str(length), 
+            bottomLeftCornerOfText, 
+            font, 
+            fontScale,
+            fontColor,
+            lineType)
+        
+        cv2.imshow("Camera Frame ",frame)
+        #Uma segunda tela aumenta mais ou menos 2% a mais do processamento
+        #Mas pode servir para mostrarmos a imagem original e a usada para processar
+        #cv2.imshow("Camera Frame2",frame)
+        cv2.waitKey(1)
+        loops = loops + 1
+    # Close device
+    cv2.destroyAllWindows()
+    video_capture.release()
+    #FIM TESTE
+    
+    #Guardando em um CSV
+    import pandas as pd 
+    pd.DataFrame(frametime).to_csv(proj_dir+"/"+rec_mode+".csv",header=None, index=None)
 
-#Guardando em um CSV
-import pandas as pd 
-pd.DataFrame(frametime).to_csv(proj_dir+"/file.csv",header=None, index=None)
+run_recognizer('null',source)
+run_recognizer('haar_only',source)
+run_recognizer('LBPH',source)
+run_recognizer('Eigen',source)
+run_recognizer('Fisher',source)
 
 
 #Importando de CSV
@@ -305,17 +346,20 @@ if graph_mode == 'go':
     import plotly.graph_objects as go
     fig = go.Figure()
     
-    df = pd.read_csv(proj_dir+'/file_no_rec.csv')
-    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name='2AM_NO_RECOGNITION'))
+    df = pd.read_csv(proj_dir+'/null.csv')
+    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_NO_RECOGNITION'))
     
-    df = pd.read_csv(proj_dir+'/file_haar.csv')
-    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name='2AM_ONLY_HAARCASCATE'))
+    df = pd.read_csv(proj_dir+'/haar_only.csv')
+    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_ONLY_HAARCASCATE'))
     
-    df = pd.read_csv(proj_dir+'/file_eighen.csv')
-    fig.add_trace(go.Scatter(x=df.index,y=df['frametime'], name='2AM_EIGHENFACE'))
+    df = pd.read_csv(proj_dir+'/LBPH.csv')
+    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_LBPH'))
     
-    df = pd.read_csv(proj_dir+'/file.csv')
-    fig.add_trace(go.Scatter(x=df.index,y=df['frametime'], name='2AM_LBPH'))
+    df = pd.read_csv(proj_dir+'/Eigen.csv')
+    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_EigenFaces'))
+    
+    df = pd.read_csv(proj_dir+'/Fisher.csv')
+    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_FisherFaces'))
     #fig.show()
     fig.update_layout(
             title="Frametimes",

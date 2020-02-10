@@ -14,3 +14,11 @@ codes/video3_full.mp4
 codes/trainingData.yml
 codes/file.csv
 codes/temp-plot.html
+codes/Fisher_trainingData.yml
+codes/Eigen_trainingData.yml
+codes/Eigen.csv
+codes/Fisher.csv
+codes/haar_only.csv
+codes/LBPH.csv
+codes/LBPH_trainingData.yml
+codes/null.csv
