@@ -11,19 +11,20 @@ Este é um arquivo de script temporário.
 ########################
 ########################
 
-#TESTING
+#PRE_SCRIPT_ARGUMENTS
 import cv2
 import numpy as np
 
 #Project Dir
-#import os
-#proj_dir = os.getcwd()
-#proj_dir = proj_dir + "\\"
 proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 #proj_dir = "D:/Git/upgraded-eureka/codes/"
 #proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
 #proj_dir = "C:/Users/ALUNO/Documents/GitHub/upgraded-eureka/codes/"
+
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
+train_res = (640,640)
+
+
 device = '2AM'
 
 #Existem três REC_MODE, 'LBPH', 'Fisher' e 'Eigen'. Existe um que não usa Reconhecimento, o 'null' e 'haar_only'
@@ -32,6 +33,10 @@ device = '2AM'
 #Existem 2 tipos de treinamento(gerar os arrays para treinamento), o Photo e video
 train_mode = "photo"
 #train_mode = "null"
+
+#############################
+#############################
+#############################
 
 #ESSE METODO TREINA APENAS PARA UMA PESSOA, PARA VÁRIAS
 #TEMOS DE ARRANJAR UM JEITO DE CARREGAR MAIS VÍDEOS E DIZER QUAL É O ID DE CADA VIDEO
@@ -89,7 +94,7 @@ def getImageFromPath(imagedir, elements):
             
         for (x, y, w, h) in face:
             print(face)
-            faceNp = cv2.resize(faceNp[y:y+h,x:x+w], (640,640) )
+            faceNp = cv2.resize(faceNp[y:y+h,x:x+w], train_res )
             faces.append(faceNp)
             #os ID das pessoas só podem ser numéricos1
             IDs.append(element[1])
@@ -207,7 +212,9 @@ run_trainer('Fisher',training_faces,training_ids)
 #source = 0
 source = proj_dir+'/midia/'+'video_bin.mp4'
 
-def run_recognizer(rec_mode, source):
+def run_recognizer(rec_mode, source, frame_size):
+    #Frame_size é um multiplicador, 1 para a resolução atual e 0.5 para metade, etc etc.
+    
     ##QUICK BOOT(AVOIDS PROBLEMS INTO LOADING)
     video_capture = cv2.VideoCapture(source)
     if not video_capture.isOpened():
@@ -260,8 +267,8 @@ def run_recognizer(rec_mode, source):
         ret, frame = video_capture.read()
         
         ##IMG PROCESSING.RESIZING - Lower Res = Higher Speed.
-        size = 1;
-        frame = cv2.resize(frame,   (int(frame.shape[1]*size) , int(frame.shape[0]*size))   )
+        #frame_size = 1;
+        frame = cv2.resize(frame,   (int(frame.shape[1]*frame_size) , int(frame.shape[0]*frame_size))   )
     
         ##IMG PROCESSING.Turning Image Gray (it wasnt used before and worked for detecting faces, but is needed for Recognizer)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -281,7 +288,7 @@ def run_recognizer(rec_mode, source):
             for (x, y, w, h) in faces:
                 ##Face recognition.Using the Recognizer
                 if rec_mode != 'null' and rec_mode != 'haar_only':
-                    ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], (640,640) ))    
+                    ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], train_res ))    
                 if conf < 30:
                     cv2.putText(frame, str(ids)+". "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
                 else:
@@ -321,13 +328,13 @@ def run_recognizer(rec_mode, source):
     #Guardando em um CSV
     import pandas as pd 
     pd.DataFrame(frametime).to_csv(proj_dir+"/"+rec_mode+".csv",header=None, index=None)
+    return "VideoRes: "+str(frame.shape[1])+"x"+str(frame.shape[0])+" FaceRes: "+str(train_res[0])+"x"+str(train_res[1])
 
-run_recognizer('null',source)
-run_recognizer('haar_only',source)
-run_recognizer('LBPH',source)
-run_recognizer('Eigen',source)
-run_recognizer('Fisher',source)
-
+null_res = run_recognizer('null',source,1)
+run_recognizer('haar_only',source,1)
+run_recognizer('LBPH',source,1)
+run_recognizer('Eigen',source,1)
+run_recognizer('Fisher',source,1)
 
 #Importando de CSV
 import pandas as pd
@@ -362,7 +369,7 @@ if graph_mode == 'go':
     fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_FisherFaces'))
     #fig.show()
     fig.update_layout(
-            title="Frametimes",
+            title="Frametimes at "+null_res,
             xaxis_title="Framenumber",
             yaxis_title="Frametime")
 
