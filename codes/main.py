@@ -24,7 +24,6 @@ proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
 train_res = (640,640)
 
-
 device = '2AM'
 
 #Existem três REC_MODE, 'LBPH', 'Fisher' e 'Eigen'. Existe um que não usa Reconhecimento, o 'null' e 'haar_only'
@@ -195,9 +194,9 @@ def run_trainer(rec_mode,training_faces,training_ids):
         rec.train(training_faces,training_ids.astype(int))
         rec.save(proj_dir+rec_mode+'_trainingData.yml')
 
-run_trainer('LBPH',training_faces,training_ids)
-run_trainer('Eigen',training_faces,training_ids)
-run_trainer('Fisher',training_faces,training_ids)
+#run_trainer('LBPH',training_faces,training_ids)
+#run_trainer('Eigen',training_faces,training_ids)
+#run_trainer('Fisher',training_faces,training_ids)
 
 #######################################
 #######################################
@@ -307,7 +306,7 @@ def run_recognizer(rec_mode, source, frame_size):
         frametime.extend([fps])
     
         ##IMG PROCESSING.INSERTING TEXT on TOPLEFT
-        cv2.putText(frame,'FPS: '+str(fps)+' Frame:'+str(loops)+' '+str(length), 
+        cv2.putText(frame,'Frametime: '+str(fps)+' Frame:'+str(loops)+' '+str(length), 
             bottomLeftCornerOfText, 
             font, 
             fontScale,
@@ -330,11 +329,13 @@ def run_recognizer(rec_mode, source, frame_size):
     pd.DataFrame(frametime).to_csv(proj_dir+"/"+rec_mode+".csv",header=None, index=None)
     return "VideoRes: "+str(frame.shape[1])+"x"+str(frame.shape[0])+" FaceRes: "+str(train_res[0])+"x"+str(train_res[1])
 
-null_res = run_recognizer('null',source,1)
-run_recognizer('haar_only',source,1)
-run_recognizer('LBPH',source,1)
-run_recognizer('Eigen',source,1)
-run_recognizer('Fisher',source,1)
+size = 1
+
+null_res = run_recognizer('null',source,size)
+run_recognizer('haar_only',source,size)
+run_recognizer('LBPH',source,size)
+run_recognizer('Eigen',source,size)
+run_recognizer('Fisher',source,size)
 
 #Importando de CSV
 import pandas as pd
