@@ -267,7 +267,8 @@ def run_recognizer(rec_mode, source, frame_size):
         
         ##IMG PROCESSING.RESIZING - Lower Res = Higher Speed.
         #frame_size = 1;
-        frame = cv2.resize(frame,   (int(frame.shape[1]*frame_size) , int(frame.shape[0]*frame_size))   )
+        if frame_size != 1:
+            frame = cv2.resize(frame,   (int(frame.shape[1]*frame_size) , int(frame.shape[0]*frame_size))   )
     
         ##IMG PROCESSING.Turning Image Gray (it wasnt used before and worked for detecting faces, but is needed for Recognizer)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
