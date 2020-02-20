@@ -30,8 +30,12 @@ device = '2AM'
 #rec_mode = 'Eigen'    
 
 #Existem 2 tipos de treinamento(gerar os arrays para treinamento), o Photo e video
-train_mode = "photo"
+train_mode = "vide1o"
 #train_mode = "null"
+
+#VIDEO SOURCE, SET 0 to Camera
+#source = 0
+source = proj_dir+'/midia/'+'video_bin.mp4'
 
 #############################
 #############################
@@ -63,11 +67,11 @@ def getImagesFromVideo(source,id):
         for (x, y, w, h) in face:
             if x != x_old and y != y_old and w != w_old and h != h_old:
                 x_old,y_old,w_old,h_old = [x,y,w,h]
-                faces.append(frame[y:y+h,x:x+w])
+                faces.append(cv2.resize(frame[y:y+h,x:x+w], train_res ))
                 #os ID das pessoas só podem ser numéricos
                 ids.append(id)
                 cv2.imshow("training",frame[y:y+h,x:x+w])
-                cv2.waitKey(10)
+                cv2.waitKey(1)
         ret, frame = video_capture.read()
         
     cv2.destroyAllWindows() 
@@ -109,26 +113,26 @@ def getImageFromPath(imagedir, elements):
 
 if train_mode=="video":
 #Adding to the training array with VIDEO
-    training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'video1.mp4',1)
-    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',3)
+    #training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'video1.mp4',1)
+    #training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'video3.mp4',3)
     
-    training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'/midia/'+'nan.mp4',1)
+    training_faces      ,training_ids       = getImagesFromVideo(proj_dir+'/midia/old/'+'nan.mp4',1)
     
-    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'bin.mp4',2)
+    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/old/'+'bin.mp4',2)
     training_faces.extend(training_faces_add)
     training_ids = np.concatenate((training_ids,training_ids_add))
     
-    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'mar.mp4',3)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))
+    #training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/old/'+'mar.mp4',3)
+    #training_faces.extend(training_faces_add)
+    #training_ids = np.concatenate((training_ids,training_ids_add))
     
-    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'car.mp4',4)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))
+    #training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/old/'+'car.mp4',4)
+    #training_faces.extend(training_faces_add)
+    #training_ids = np.concatenate((training_ids,training_ids_add))
     
-    training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/'+'eri.mp4',5)
-    training_faces.extend(training_faces_add)
-    training_ids = np.concatenate((training_ids,training_ids_add))
+    #training_faces_add  ,training_ids_add   = getImagesFromVideo(proj_dir+'/midia/old/'+'eri.mp4',5)
+    #training_faces.extend(training_faces_add)
+    #training_ids = np.concatenate((training_ids,training_ids_add))
 
 
 ##extend junta os arrays
@@ -207,10 +211,6 @@ def run_trainer(rec_mode,training_faces,training_ids):
 #######################################
 #######################################
 
-#VIDEO SOURCE, SET 0 to Camera
-#source = 0
-source = proj_dir+'/midia/'+'video_bin.mp4'
-
 def run_recognizer(rec_mode, source, frame_size):
     #Frame_size é um multiplicador, 1 para a resolução atual e 0.5 para metade, etc etc.
     
@@ -278,7 +278,7 @@ def run_recognizer(rec_mode, source, frame_size):
         if rec_mode != 'null':
             faces = face_cascade.detectMultiScale(
                 frame,
-                scaleFactor=1.3,
+                scaleFactor=1.5,
                 minNeighbors=5
                 )
             ids = '--'

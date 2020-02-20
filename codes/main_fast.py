@@ -108,7 +108,7 @@ def run_recognizer(rec_mode, source, frame_size):
         loops = loops + 1
     
     repeat = 1
-    while (repeat != 5):
+    while (repeat < 2):
         
         loops = 0
         video_capture = cv2.VideoCapture(source)
@@ -146,6 +146,7 @@ def run_recognizer(rec_mode, source, frame_size):
             loops = loops + 1
         
         repeat = repeat + 1
+        video_capture.release()
         
     # Close device
     cv2.destroyAllWindows()
