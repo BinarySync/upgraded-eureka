@@ -20,7 +20,7 @@ proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
 train_res = (640,640)
 
-device = '2AM'
+device = 'RaspBerry Pi B+'
 
 #Existem três REC_MODE, 'LBPH', 'Fisher' e 'Eigen'. Existe um que não usa Reconhecimento, o 'null' e 'haar_only'
 #rec_mode = 'Eigen'    
@@ -84,6 +84,12 @@ def run_recognizer(rec_mode, source, frame_size):
         
         ##IMG PROCESSING.Turning Image Gray (it wasnt used before and worked for detecting faces, but is needed for Recognizer)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        
+        ##IMG PROCESSING.RESIZING - Lower Res = Higher Speed.
+        #frame_size = 1;
+        if frame_size != 1:
+            frame = cv2.resize(frame,   (int(frame.shape[1]*frame_size) , int(frame.shape[0]*frame_size))   )        
     
         #Face recognition  
         ##Face recognition.HaarCascate, Detecting faces
@@ -122,6 +128,11 @@ def run_recognizer(rec_mode, source, frame_size):
             ##IMG PROCESSING.Turning Image Gray (it wasnt used before and worked for detecting faces, but is needed for Recognizer)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
+            ##IMG PROCESSING.RESIZING - Lower Res = Higher Speed.
+            #frame_size = 1;
+            if frame_size != 1:
+                frame = cv2.resize(frame,   (int(frame.shape[1]*frame_size) , int(frame.shape[0]*frame_size))   )
+                
             #Face recognition  
             ##Face recognition.HaarCascate, Detecting faces
             if rec_mode != 'null':
@@ -158,7 +169,7 @@ def run_recognizer(rec_mode, source, frame_size):
     pd.DataFrame(frametime).to_csv(proj_dir+"/"+rec_mode+".csv",header=None, index=None)
     return "VideoRes: "+str(frame.shape[1])+"x"+str(frame.shape[0])+" FaceRes: "+str(train_res[0])+"x"+str(train_res[1])
 
-size = 1
+size = 0.5
 
 null_res = run_recognizer('null',source,size)
 run_recognizer('haar_only',source,size)
@@ -166,6 +177,8 @@ run_recognizer('LBPH',source,size)
 run_recognizer('Eigen',source,size)
 run_recognizer('Fisher',source,size)
 
+
+null_res = "Frametimes at VideoRes: 640x360 FaceRes: 640x640"
 #Importando de CSV
 import pandas as pd
 graph_mode = 'go'

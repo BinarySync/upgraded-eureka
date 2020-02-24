@@ -30,7 +30,7 @@ device = '2AM'
 #rec_mode = 'Eigen'    
 
 #Existem 2 tipos de treinamento(gerar os arrays para treinamento), o Photo e video
-train_mode = "vide1o"
+train_mode = "video"
 #train_mode = "null"
 
 #VIDEO SOURCE, SET 0 to Camera
@@ -198,9 +198,9 @@ def run_trainer(rec_mode,training_faces,training_ids):
         rec.train(training_faces,training_ids.astype(int))
         rec.save(proj_dir+rec_mode+'_trainingData.yml')
 
-#run_trainer('LBPH',training_faces,training_ids)
-#run_trainer('Eigen',training_faces,training_ids)
-#run_trainer('Fisher',training_faces,training_ids)
+run_trainer('LBPH',training_faces,training_ids)
+run_trainer('Eigen',training_faces,training_ids)
+run_trainer('Fisher',training_faces,training_ids)
 
 #######################################
 #######################################
@@ -278,7 +278,7 @@ def run_recognizer(rec_mode, source, frame_size):
         if rec_mode != 'null':
             faces = face_cascade.detectMultiScale(
                 frame,
-                scaleFactor=1.5,
+                scaleFactor=1.3,
                 minNeighbors=5
                 )
             ids = '--'
@@ -332,11 +332,13 @@ def run_recognizer(rec_mode, source, frame_size):
 
 size = 1
 
-null_res = run_recognizer('null',source,size)
-run_recognizer('haar_only',source,size)
-run_recognizer('LBPH',source,size)
-run_recognizer('Eigen',source,size)
-run_recognizer('Fisher',source,size)
+#device = 'Raspberry Pi 3 B+'
+#null_res = "VideoRes: 640x360 FaceRes: 640x640"
+#null_res = run_recognizer('null',source,size)
+#run_recognizer('haar_only',source,size)
+#run_recognizer('LBPH',source,size)
+#run_recognizer('Eigen',source,size)
+#run_recognizer('Fisher',source,size)
 
 #Importando de CSV
 import pandas as pd
