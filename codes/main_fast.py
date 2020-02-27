@@ -20,7 +20,7 @@ proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
 train_res = (640,640)
 
-device = 'RaspBerry Pi B+'
+device = '2AM'
 
 #Existem três REC_MODE, 'LBPH', 'Fisher' e 'Eigen'. Existe um que não usa Reconhecimento, o 'null' e 'haar_only'
 #rec_mode = 'Eigen'    
@@ -35,8 +35,8 @@ device = 'RaspBerry Pi B+'
 #######################################
 
 #VIDEO SOURCE, SET 0 to Camera
-#source = 0
-source = proj_dir+'/midia/'+'video_bin.mp4'
+source = 0
+#source = proj_dir+'/midia/'+'video_bin.mp4'
 
 def run_recognizer(rec_mode, source, frame_size):
     #Frame_size é um multiplicador, 1 para a resolução atual e 0.5 para metade, etc etc.
@@ -169,16 +169,16 @@ def run_recognizer(rec_mode, source, frame_size):
     pd.DataFrame(frametime).to_csv(proj_dir+"/"+rec_mode+".csv",header=None, index=None)
     return "VideoRes: "+str(frame.shape[1])+"x"+str(frame.shape[0])+" FaceRes: "+str(train_res[0])+"x"+str(train_res[1])
 
-size = 0.5
+size = 1
 
 null_res = run_recognizer('null',source,size)
 run_recognizer('haar_only',source,size)
-run_recognizer('LBPH',source,size)
-run_recognizer('Eigen',source,size)
-run_recognizer('Fisher',source,size)
+#run_recognizer('LBPH',source,size)
+#run_recognizer('Eigen',source,size)
+#run_recognizer('Fisher',source,size)
 
 
-null_res = "Frametimes at VideoRes: 640x360 FaceRes: 640x640"
+#null_res = "Frametimes at VideoRes: 640x360 FaceRes: 640x640"
 #Importando de CSV
 import pandas as pd
 graph_mode = 'go'
