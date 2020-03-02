@@ -30,12 +30,12 @@ device = '2AM'
 #rec_mode = 'Eigen'    
 
 #Existem 2 tipos de treinamento(gerar os arrays para treinamento), o Photo e video
-train_mode = "photo_v2"
+train_mode = "photo_v21"
 #train_mode = "null"
 
 #VIDEO SOURCE, SET 0 to Camera
-source = 0
-#source = proj_dir+'/midia/'+'video_bin.mp4'
+#source = 0
+source = proj_dir+'/midia/'+'video_bin.mp4'
 
 #############################
 #############################
@@ -196,6 +196,20 @@ if train_mode == "photo_v2":
                                                                                    ['nan_12.jpg',1],
                                                                                    ['nan_13.jpg',1],
                                                                                    ['nan_14.jpg',1],
+                                                                                   ['gui_1.jpg',2],
+                                                                                   ['gui_2.jpg',2],
+                                                                                   ['gui_3.jpg',2],
+                                                                                   ['gui_4.jpg',2],
+                                                                                   ['gui_5.jpg',2],
+                                                                                   ['gui_6.jpg',2],
+                                                                                   ['gui_7.jpg',2],
+                                                                                   ['gui_8.jpg',2],
+                                                                                   ['gui_9.jpg',2],
+                                                                                   ['gui_10.jpg',2],
+                                                                                   ['gui_11.jpg',2],
+                                                                                   ['gui_12.jpg',2],
+                                                                                   ['gui_13.jpg',2],
+                                                                                   ['gui_14.jpg',2],
                                                                                    ['edu_1.jpg',4],
                                                                                    ['edu_2.jpg',4],                                                               ['nan_2.jpg',1],
                                                                                    ['edu_3.jpg',4],
@@ -210,13 +224,6 @@ if train_mode == "photo_v2":
                                                                                    ['edu_12.jpg',4],
                                                                                    ['edu_13.jpg',4],
                                                                                    ['edu_14.jpg',4],
-                                                                                   ['bin_1.jpg',2],
-                                                                                   ['bin_2.jpg',2],
-                                                                                   ['bin_3.jpg',2],
-                                                                                   ['bin_4.jpg',2],
-                                                                                   ['bin_5.jpg',2],
-                                                                                   ['bin_6.jpg',2],
-                                                                                   ['bin_7.jpg',2],
                                                                                    ['eri_1.jpg',3],                                                                                 
                                                                                    ['eri_2.jpg',3],
                                                                                    ['eri_3.jpg',3],
@@ -254,6 +261,49 @@ def run_trainer(rec_mode,training_faces,training_ids):
 #######################################
 #######################################
 #######################################
+
+def run_recognizer_on_photo(rec_mode,source,frame_size):
+    ##TEXT DEFINITIONS
+    font                   = cv2.FONT_HERSHEY_SIMPLEX
+    fontScale              = 1
+    fontColor              = (255,255,255)
+    lineType               = 2
+    
+    faceImg = Image.open(source).convert('L')
+    faceNp = np.array(faceImg,'uint8')
+    
+    if rec_mode == 'Eigen':
+        rec = cv2.face.EigenFaceRecognizer_create()
+    
+    if rec_mode == 'Fisher':
+        rec = cv2.face.FisherFaceRecognizer_create()
+    
+    if rec_mode == 'LBPH':
+        rec = cv2.face.LBPHFaceRecognizer_create()   
+    
+    rec.read(proj_dir+rec_mode+"_trainingData.yml")
+    
+    face = face_cascade.detectMultiScale(
+        faceNp,
+        scaleFactor=1.3,
+        minNeighbors=5
+        )
+            
+    for (x, y, w, h) in face:
+        print(face)
+        faceNp = cv2.resize(faceNp[y:y+h,x:x+w], train_res )
+        
+        ids,conf = rec.predict(faceNp)  
+        if conf < 30:
+            cv2.putText(faceNp, str(ids)+". "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
+        else:
+            cv2.putText(faceNp, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
+        cv2.rectangle(faceNp, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                    
+        #os ID das pessoas só podem ser numéricos1
+        cv2.imshow("Detected",faceNp)
+        cv2.waitKey(3000)
+        cv2.destroyAllWindows() 
 
 def run_recognizer(rec_mode, source, frame_size):
     #Frame_size é um multiplicador, 1 para a resolução atual e 0.5 para metade, etc etc.
@@ -344,7 +394,7 @@ def run_recognizer(rec_mode, source, frame_size):
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                     
                     if last_conf == conf:
-                        conf = '--'
+                        conf = ' '
                     last_conf = conf
                     confi.extend([conf])
             
@@ -387,9 +437,12 @@ size = 1
 null_res = "VideoRes: 1280x720 FaceRes: 640x640"
 #null_res = run_recognizer('null',source,size)
 #run_recognizer('haar_only',source,size)
-run_recognizer('LBPH',source,size)
-run_recognizer('Eigen',source,size)
-run_recognizer('Fisher',source,size)
+#run_recognizer('LBPH',source,size)
+#run_recognizer('Eigen',source,size)
+#run_recognizer('Fisher',source,size)
+
+run_recognizer_on_photo('LBPH',proj_dir+'/midia/nan_1.jpg',size)
+
 
 #Importando de CSV
 import pandas as pd
