@@ -1,0 +1,9 @@
+#HaarCascade
+	Tamanho da imagem;
+	scaleFactor;
+	Clock da CPU;
+
+#Reconhecimento
+	Número de samples;
+	Resolução da face;
+	Clock da CPU;

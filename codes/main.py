@@ -16,13 +16,13 @@ import cv2
 import numpy as np
 
 #Project Dir
-proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
+#proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 #proj_dir = "D:/Git/upgraded-eureka/codes/"
 #proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
-#proj_dir = "C:/Users/ALUNO/Documents/GitHub/upgraded-eureka/codes/"
+proj_dir = "C:/Users/ALUNO/Documents/GitHub/upgraded-eureka/codes/"
 
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
-train_res = (640,640)
+train_res = (160,160)
 
 device = '2AM'
 
@@ -30,12 +30,12 @@ device = '2AM'
 #rec_mode = 'Eigen'    
 
 #Existem 2 tipos de treinamento(gerar os arrays para treinamento), o Photo e video
-train_mode = "photo_v21"
+train_mode = "photo_v2"
 #train_mode = "null"
 
 #VIDEO SOURCE, SET 0 to Camera
 #source = 0
-source = proj_dir+'/midia/'+'video_bin.mp4'
+source = proj_dir+'/midia/video_nan.mp4'
 
 #############################
 #############################
@@ -210,27 +210,20 @@ if train_mode == "photo_v2":
                                                                                    ['gui_12.jpg',2],
                                                                                    ['gui_13.jpg',2],
                                                                                    ['gui_14.jpg',2],
-                                                                                   ['edu_1.jpg',4],
-                                                                                   ['edu_2.jpg',4],                                                               ['nan_2.jpg',1],
-                                                                                   ['edu_3.jpg',4],
-                                                                                   ['edu_4.jpg',4],
-                                                                                   ['edu_5.jpg',4],
-                                                                                   ['edu_6.jpg',4],
-                                                                                   ['edu_7.jpg',4],
-                                                                                   ['edu_8.jpg',4],
-                                                                                   ['edu_9.jpg',4],
-                                                                                   ['edu_10.jpg',4],
-                                                                                   ['edu_11.jpg',4],
-                                                                                   ['edu_12.jpg',4],
-                                                                                   ['edu_13.jpg',4],
-                                                                                   ['edu_14.jpg',4],
-                                                                                   ['eri_1.jpg',3],                                                                                 
-                                                                                   ['eri_2.jpg',3],
-                                                                                   ['eri_3.jpg',3],
-                                                                                   ['eri_4.jpg',3],
-                                                                                   ['eri_5.jpg',3],
-                                                                                   ['eri_6.jpg',3],
-                                                                                   ['eri_7.jpg',3],
+                                                                                   ['edu_1.jpg',3],
+                                                                                   ['edu_2.jpg',3],                                                               ['nan_2.jpg',1],
+                                                                                   ['edu_3.jpg',3],
+                                                                                   ['edu_4.jpg',3],
+                                                                                   ['edu_5.jpg',3],
+                                                                                   ['edu_6.jpg',3],
+                                                                                   ['edu_7.jpg',3],
+                                                                                   ['edu_8.jpg',3],
+                                                                                   ['edu_9.jpg',3],
+                                                                                   ['edu_10.jpg',3],
+                                                                                   ['edu_11.jpg',3],
+                                                                                   ['edu_12.jpg',3],
+                                                                                   ['edu_13.jpg',3],
+                                                                                   ['edu_14.jpg',3],
                                                                                                   ])
 
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
@@ -249,9 +242,9 @@ def run_trainer(rec_mode,training_faces,training_ids):
         rec.train(training_faces,training_ids.astype(int))
         rec.save(proj_dir+rec_mode+'_trainingData.yml')
 
-#run_trainer('LBPH',training_faces,training_ids)
-#run_trainer('Eigen',training_faces,training_ids)
-#run_trainer('Fisher',training_faces,training_ids)
+run_trainer('LBPH',training_faces,training_ids)
+run_trainer('Eigen',training_faces,training_ids)
+run_trainer('Fisher',training_faces,training_ids)
 
 #######################################
 #######################################
@@ -291,9 +284,7 @@ def run_recognizer_on_photo(rec_mode,source,frame_size):
             
     for (x, y, w, h) in face:
         print(face)
-        faceNp = cv2.resize(faceNp[y:y+h,x:x+w], train_res )
-        
-        ids,conf = rec.predict(faceNp)  
+        ids,conf = rec.predict(cv2.resize(faceNp[y:y+h,x:x+w], train_res ))  
         if conf < 30:
             cv2.putText(faceNp, str(ids)+". "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
         else:
@@ -304,6 +295,7 @@ def run_recognizer_on_photo(rec_mode,source,frame_size):
         cv2.imshow("Detected",faceNp)
         cv2.waitKey(3000)
         cv2.destroyAllWindows() 
+        
 
 def run_recognizer(rec_mode, source, frame_size):
     #Frame_size é um multiplicador, 1 para a resolução atual e 0.5 para metade, etc etc.
@@ -382,11 +374,7 @@ def run_recognizer(rec_mode, source, frame_size):
             for (x, y, w, h) in faces:
                 ##Face recognition.Using the Recognizer
                 if rec_mode != 'null' and rec_mode != 'haar_only':
-                    ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], train_res ))  
-                    if rec_mode == 'Fisher':
-                        conf = (conf * 55)/16541
-                    if rec_mode == 'Eigen':
-                        conf = (conf * 55)/22291                        
+                    ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], train_res ))                    
                     if conf < 30:
                         cv2.putText(frame, str(ids)+". "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
                     else:
@@ -441,7 +429,13 @@ null_res = "VideoRes: 1280x720 FaceRes: 640x640"
 #run_recognizer('Eigen',source,size)
 #run_recognizer('Fisher',source,size)
 
-run_recognizer_on_photo('LBPH',proj_dir+'/midia/nan_1.jpg',size)
+run_recognizer('LBPH',source,size)
+run_recognizer('Fisher',source,size)
+run_recognizer('Eigen',source,size)
+
+run_recognizer_on_photo('Fisher',proj_dir+'/midia/edu_1.jpg',size)
+#run_recognizer_on_photo('Fisher',proj_dir+'/midia/edu_1.jpg',size)
+#run_recognizer_on_photo('Eigen',proj_dir+'/midia/edu_1.jpg',size)
 
 
 #Importando de CSV
@@ -456,6 +450,10 @@ if graph_mode == 'px':
     
     df = pd.read_csv(proj_dir+'/file_1.csv')
     fig.add_scatter(x=df.index,y=df['frametime'], mode='lines')
+    
+    from plotly.offline import plot
+    plot(fig)
+
 
 if graph_mode == 'go':
     import plotly.graph_objects as go
@@ -480,6 +478,10 @@ if graph_mode == 'go':
             title="Frametimes at "+null_res,
             xaxis_title="Framenumber",
             yaxis_title="Frametime")
+    
+    from plotly.offline import plot
+    plot(fig)
+
 
 if graph_mode == 'go_conf':
     import plotly.graph_objects as go
@@ -499,5 +501,5 @@ if graph_mode == 'go_conf':
             xaxis_title="Framenumber",
             yaxis_title="Frametime")
 
-from plotly.offline import plot
-plot(fig)
+    from plotly.offline import plot
+    plot(fig)
