@@ -35,8 +35,8 @@ device = '2AM'
 #######################################
 
 #VIDEO SOURCE, SET 0 to Camera
-source = 0
-#source = proj_dir+'/midia/'+'video_bin.mp4'
+#source = 0
+source = proj_dir+'/midia/'+'video_bin.mp4'
 
 def run_recognizer(rec_mode, source, frame_size):
     #Frame_size é um multiplicador, 1 para a resolução atual e 0.5 para metade, etc etc.
@@ -173,9 +173,9 @@ size = 1
 
 null_res = run_recognizer('null',source,size)
 run_recognizer('haar_only',source,size)
-#run_recognizer('LBPH',source,size)
-#run_recognizer('Eigen',source,size)
-#run_recognizer('Fisher',source,size)
+run_recognizer('LBPH',source,size)
+run_recognizer('Eigen',source,size)
+run_recognizer('Fisher',source,size)
 
 
 #null_res = "Frametimes at VideoRes: 640x360 FaceRes: 640x640"
