@@ -16,13 +16,13 @@ import cv2
 import numpy as np
 
 #Project Dir
-#proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
+proj_dir = "N:/NeoTokyo_Data/Documents/GitHub/upgraded-eureka/codes/"
 #proj_dir = "D:/Git/upgraded-eureka/codes/"
 #proj_dir = "C:/Users/Guilherme/Desktop/TCC/upgraded-eureka/codes/"
-proj_dir = "C:/Users/ALUNO/Documents/GitHub/upgraded-eureka/codes/"
+#proj_dir = "C:/Users/ALUNO/Documents/GitHub/upgraded-eureka/codes/"
 
 face_cascade = cv2.CascadeClassifier(proj_dir+"haarcascade_frontalface_default.xml")
-train_res = (160,160)
+train_res = (640,640)
 
 device = '2AM'
 
@@ -30,12 +30,12 @@ device = '2AM'
 #rec_mode = 'Eigen'    
 
 #Existem 2 tipos de treinamento(gerar os arrays para treinamento), o Photo e video
-train_mode = "photo_v2"
+train_mode = "photo_v1"
 #train_mode = "null"
 
 #VIDEO SOURCE, SET 0 to Camera
-#source = 0
-source = proj_dir+'/midia/video_nan.mp4'
+source = 0
+#source = proj_dir+'/midia/v1/car.mp4'
 
 #############################
 #############################
@@ -145,7 +145,7 @@ if train_mode=="video":
 #Adding to the training array with IMAGE
 if train_mode == "photo_v1":
     
-    training_faces      ,training_ids       = getImageFromPath(proj_dir+'/midia/v1',[['nan_1.jpg',1],
+    training_faces      ,training_ids       = getImageFromPath(proj_dir+'/midia/v2/',[['nan_1.jpg',1],
                                                                                    ['nan_2.jpg',1],
                                                                                    ['nan_3.jpg',1],
                                                                                    ['nan_4.jpg',1],
@@ -224,6 +224,14 @@ if train_mode == "photo_v2":
                                                                                    ['edu_12.jpg',3],
                                                                                    ['edu_13.jpg',3],
                                                                                    ['edu_14.jpg',3],
+                                                                                   ['carol_1.jpg',4],      
+                                                                                   ['carol_2.jpg',4],    
+                                                                                   ['carol_3.jpg',4],    
+                                                                                   ['carol_4.jpg',4],    
+                                                                                   ['carol_5.jpg',4],    
+                                                                                   ['carol_6.jpg',4],    
+                                                                                   ['carol_7.jpg',4],    
+                                                                                   ['carol_8.jpg',4]
                                                                                                   ])
 
 #Treinar é uma atividade demorada, e não utiliza vários núcleos, recomenda-se usar vídeos pequenos
@@ -231,12 +239,15 @@ if train_mode == "photo_v2":
 def run_trainer(rec_mode,training_faces,training_ids):
     if rec_mode == 'Eigen':
         rec = cv2.face.EigenFaceRecognizer_create()
+        print("Training_Eigen_Complete")
     
     if rec_mode == 'Fisher':
         rec = cv2.face.FisherFaceRecognizer_create()
+        print("Training_Fisher_Complete")
     
     if rec_mode == 'LBPH':
         rec = cv2.face.LBPHFaceRecognizer_create()
+        print("Training_LBPH_Complete")
     
     if rec_mode != 'null' and rec_mode != 'haar_only':
         rec.train(training_faces,training_ids.astype(int))
@@ -254,6 +265,7 @@ run_trainer('Fisher',training_faces,training_ids)
 #######################################
 #######################################
 #######################################
+
 
 def run_recognizer_on_photo(rec_mode,source,frame_size):
     ##TEXT DEFINITIONS
@@ -290,13 +302,13 @@ def run_recognizer_on_photo(rec_mode,source,frame_size):
         else:
             cv2.putText(faceNp, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
         cv2.rectangle(faceNp, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        print(str(ids)+' and '+str(conf))
                     
         #os ID das pessoas só podem ser numéricos1
         cv2.imshow("Detected",faceNp)
         cv2.waitKey(3000)
         cv2.destroyAllWindows() 
         
-
 def run_recognizer(rec_mode, source, frame_size):
     #Frame_size é um multiplicador, 1 para a resolução atual e 0.5 para metade, etc etc.
     
@@ -381,10 +393,10 @@ def run_recognizer(rec_mode, source, frame_size):
                         cv2.putText(frame, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                     
-                    if last_conf == conf:
-                        conf = ' '
-                    last_conf = conf
-                    confi.extend([conf])
+                    #if last_conf == conf:
+                    #    conf = ' '
+                    #last_conf = conf
+                    #confi.extend([conf])
             
         end = time.time()
         seconds = end - start
@@ -393,7 +405,7 @@ def run_recognizer(rec_mode, source, frame_size):
 
         #frametime.extend([[fps,conf]])
         ##FrameTime.Add to graph
-        #frametime.extend([fps])
+        frametime.extend([fps])
 
         ##IMG PROCESSING.INSERTING TEXT on TOPLEFT
         cv2.putText(frame,'Frametime: '+str(fps)+' Frame:'+str(loops)+' '+str(length), 
@@ -416,15 +428,16 @@ def run_recognizer(rec_mode, source, frame_size):
     
     #Guardando em um CSV
     import pandas as pd 
-    pd.DataFrame(confi).to_csv(proj_dir+"/"+rec_mode+".csv",header=None, index=None)
+    pd.DataFrame(frametime).to_csv(proj_dir+"/"+rec_mode+".csv",header=None, index=None)
+    #pd.DataFrame(confi).to_csv(proj_dir+"/"+rec_mode+".csv",header=None, index=None)
     return "VideoRes: "+str(frame.shape[1])+"x"+str(frame.shape[0])+" FaceRes: "+str(train_res[0])+"x"+str(train_res[1])
 
 size = 1
 
 #device = 'Raspberry Pi 3 B+'
-null_res = "VideoRes: 1280x720 FaceRes: 640x640"
-#null_res = run_recognizer('null',source,size)
-#run_recognizer('haar_only',source,size)
+#null_res = "VideoRes: 1280x720 FaceRes: 640x640"
+null_res = run_recognizer('null',source,size)
+run_recognizer('haar_only',source,size)
 #run_recognizer('LBPH',source,size)
 #run_recognizer('Eigen',source,size)
 #run_recognizer('Fisher',source,size)
@@ -433,7 +446,7 @@ run_recognizer('LBPH',source,size)
 run_recognizer('Fisher',source,size)
 run_recognizer('Eigen',source,size)
 
-run_recognizer_on_photo('Fisher',proj_dir+'/midia/edu_1.jpg',size)
+run_recognizer_on_photo('Fisher',proj_dir+'/midia/v2/lin_3.jpg',size)
 #run_recognizer_on_photo('Fisher',proj_dir+'/midia/edu_1.jpg',size)
 #run_recognizer_on_photo('Eigen',proj_dir+'/midia/edu_1.jpg',size)
 
