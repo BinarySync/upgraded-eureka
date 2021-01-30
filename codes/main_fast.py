@@ -75,9 +75,10 @@ def run_recognizer(rec_mode, source, frame_size):
     ##FRAMETIME SET UP
     import time
     frametime = ['frametime']
+    frame_looplimit = 500
 
     ##VIDEO LOOP START
-    while (ret and (loops<500 and loops != length-1)):
+    while (ret and (loops<frame_looplimit and loops != length-1)):
 
         start = time.time()
         ret, frame = video_capture.read()
@@ -87,7 +88,7 @@ def run_recognizer(rec_mode, source, frame_size):
         
         
         ##IMG PROCESSING.RESIZING - Lower Res = Higher Speed.
-        #frame_size = 1;
+        #O IF não gera nenhuma mudança de tempo perceptivel no gráfico.
         if frame_size != 1:
             frame = cv2.resize(frame,   (int(frame.shape[1]*frame_size) , int(frame.shape[0]*frame_size))   )        
     
@@ -113,6 +114,9 @@ def run_recognizer(rec_mode, source, frame_size):
         frametime.append(fps)
         loops = loops + 1
     
+
+    #Esse aqui é um loop extra, que eu uso para os gráficos. O gráfico é a média de uma rodada + o numero de loops abaixo.
+    #O número de repetições é 1 se repeat < 2, 2 se repeat < 3, e assim por diante..
     repeat = 1
     while (repeat < 2):
         
@@ -121,7 +125,7 @@ def run_recognizer(rec_mode, source, frame_size):
         if not video_capture.isOpened():
             raise Exception("Erro ao acessar fonte de vídeo")
         
-        while (ret and (loops<500 and loops != length-1)):
+        while (ret and (loops<frame_looplimit and loops != length-1)):
             start = time.time()
             ret, frame = video_capture.read()
             
@@ -151,6 +155,7 @@ def run_recognizer(rec_mode, source, frame_size):
             end = time.time()
             seconds = end - start
             ##FrameTime.formating, 6 digit float.
+            ##OBS: isso aqui serve pra tirar a média dos loops extras, do anterior+novo.
             fps  = "%6f" % ((float(frametime[loops+1]) + seconds)/2)
             frametime[loops+1] = fps
     
@@ -197,10 +202,10 @@ if graph_mode == 'go':
     fig = go.Figure()
     
     df = pd.read_csv(proj_dir+'/null.csv')
-    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_NO_RECOGNITION'))
+    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_SEM_RECONHECIMENTO'))
     
     df = pd.read_csv(proj_dir+'/haar_only.csv')
-    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_ONLY_HAARCASCATE'))
+    fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_HaarCascade'))
     
     df = pd.read_csv(proj_dir+'/LBPH.csv')
     fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name=device+'_LBPH'))

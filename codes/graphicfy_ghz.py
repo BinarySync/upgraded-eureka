@@ -30,6 +30,7 @@ fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name='Lenovo_EigenFaces
 
 
 
+
 #df = pd.read_csv(proj_dir+'/tests/desempenho_tests/149_samples_2ids/[]_3.9ghz_video640x360/null.csv')
 #fig.add_trace(go.Scatter(x=df.index, y=df['frametime'] , name='[640x360][]_SEM_DETECÇÃO'))
 

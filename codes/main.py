@@ -30,12 +30,16 @@ device = '2AM'
 #rec_mode = 'Eigen'    
 
 #Existem 2 tipos de treinamento(gerar os arrays para treinamento), o Photo e video
-train_mode = "photo_v1"
-#train_mode = "null"
+#train_mode = "photo_v1"
+train_mode = "null"
 
 #VIDEO SOURCE, SET 0 to Camera
-source = 0
-#source = proj_dir+'/midia/v1/car.mp4'
+#source = 0
+source = proj_dir+'/midia/v1/bin.mp4'
+#source = proj_dir+'/midia/video_bin.mp4'
+
+#Run_Mode pode ser configurado como 'training' ou qualquer outra coisa, 'training' irá fazer treinamento dos métodos
+run_mode = "traininga"
 
 #############################
 #############################
@@ -253,9 +257,10 @@ def run_trainer(rec_mode,training_faces,training_ids):
         rec.train(training_faces,training_ids.astype(int))
         rec.save(proj_dir+rec_mode+'_trainingData.yml')
 
-run_trainer('LBPH',training_faces,training_ids)
-run_trainer('Eigen',training_faces,training_ids)
-run_trainer('Fisher',training_faces,training_ids)
+if run_mode == 'training':
+    run_trainer('LBPH',training_faces,training_ids)
+    run_trainer('Eigen',training_faces,training_ids)
+    run_trainer('Fisher',training_faces,training_ids)
 
 #######################################
 #######################################
@@ -266,7 +271,7 @@ run_trainer('Fisher',training_faces,training_ids)
 #######################################
 #######################################
 
-
+#Método pra rodar o reconhecimento em apenas uma foto
 def run_recognizer_on_photo(rec_mode,source,frame_size):
     ##TEXT DEFINITIONS
     font                   = cv2.FONT_HERSHEY_SIMPLEX
@@ -309,6 +314,8 @@ def run_recognizer_on_photo(rec_mode,source,frame_size):
         cv2.waitKey(3000)
         cv2.destroyAllWindows() 
         
+
+#Método principal utilizado no método, pra usar o reconhecimento em uma fonte de vídeo.        
 def run_recognizer(rec_mode, source, frame_size):
     #Frame_size é um multiplicador, 1 para a resolução atual e 0.5 para metade, etc etc.
     
@@ -350,9 +357,7 @@ def run_recognizer(rec_mode, source, frame_size):
     
     ##FRAMETIME SET UP
     import time
-    #frametime = ['frametime']
-    confi = ['conf']
-    last_conf = -1
+    frametime = ['frametime']
 
     ##VIDEO LOOP START
     while (ret and (loops<500 and loops != length-1)):
@@ -376,7 +381,7 @@ def run_recognizer(rec_mode, source, frame_size):
         if rec_mode != 'null':
             faces = face_cascade.detectMultiScale(
                 frame,
-                scaleFactor=1.3,
+                scaleFactor=1.1,
                 minNeighbors=5
                 )
             ids = '--'
@@ -385,13 +390,13 @@ def run_recognizer(rec_mode, source, frame_size):
             #faces = faces*1/size
             for (x, y, w, h) in faces:
                 ##Face recognition.Using the Recognizer
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                 if rec_mode != 'null' and rec_mode != 'haar_only':
-                    ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], train_res ))                    
+                    ids,conf = rec.predict(cv2.resize(frame[y:y+h,x:x+w], train_res ))   
                     if conf < 30:
                         cv2.putText(frame, str(ids)+". "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
                     else:
                         cv2.putText(frame, str(ids)+".No Match: "+str(conf), (x+2,y+h-5), font, fontScale, fontColor,lineType)
-                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                     
                     #if last_conf == conf:
                     #    conf = ' '
@@ -419,6 +424,8 @@ def run_recognizer(rec_mode, source, frame_size):
         #Uma segunda tela aumenta mais ou menos 2% a mais do processamento
         #Mas pode servir para mostrarmos a imagem original e a usada para processar
         #cv2.imshow("Camera Frame2",frame)
+        if loops==35:
+            cv2.waitKey(2000)
         cv2.waitKey(1)
         loops = loops + 1
     # Close device
@@ -438,22 +445,22 @@ size = 1
 #null_res = "VideoRes: 1280x720 FaceRes: 640x640"
 null_res = run_recognizer('null',source,size)
 run_recognizer('haar_only',source,size)
-#run_recognizer('LBPH',source,size)
-#run_recognizer('Eigen',source,size)
-#run_recognizer('Fisher',source,size)
-
 run_recognizer('LBPH',source,size)
-run_recognizer('Fisher',source,size)
 run_recognizer('Eigen',source,size)
+run_recognizer('Fisher',source,size)
 
-run_recognizer_on_photo('Fisher',proj_dir+'/midia/v2/lin_3.jpg',size)
+#run_recognizer('LBPH',source,size)
+#run_recognizer('Fisher',source,size)
+#run_recognizer('Eigen',source,size)
+
+#run_recognizer_on_photo('Fisher',proj_dir+'/midia/v2/lin_3.jpg',size)
 #run_recognizer_on_photo('Fisher',proj_dir+'/midia/edu_1.jpg',size)
 #run_recognizer_on_photo('Eigen',proj_dir+'/midia/edu_1.jpg',size)
 
 
 #Importando de CSV
 import pandas as pd
-graph_mode = 'go_conf'
+graph_mode = 'go'
 
 if graph_mode == 'px':
     import plotly.express as px
